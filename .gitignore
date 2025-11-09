@@ -1,0 +1,9 @@
+# IntelliJ / IDE files 
+*.iml 
+.idea/ 
+out/ 
+# Banco de dados local 
+*.mv.db 
+*.trace.db 
+# Arquivos tempor rios 
+*.log 
