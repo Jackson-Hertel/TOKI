@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOKI | Tela Principal</title>
+    <link rel="stylesheet" href="../css/tela_principal.css">
+</head>
+<body>
+
+<!-- Painel lateral -->
+<aside class="sidebar">
+    <h2 class="logo">TOKI</h2>
+    <nav>
+        <ul>
+            <li class="active">📅 Agenda</li>
+            <li>🗒️ Eventos</li>
+            <li>👤 Perfil</li>
+            <li><a href="../login_cadastro/login.html" class="logout">🚪 Sair</a></li>
+        </ul>
+    </nav>
+</aside>
+
+<!-- Conteúdo principal -->
+<main class="main-content">
+    <header>
+        <h1>Bem-vindo ao TOKI</h1>
+        <p id="nomeUsuario"></p>
+    </header>
+
+    <section class="calendar-header">
+        <button id="prev">&#8592;</button>
+        <h2 id="month-year"></h2>
+        <button id="next">&#8594;</button>
+    </section>
+
+    <section id="calendar"></section>
+
+    <button id="add-event">＋ Novo Evento</button>
+</main>
+
+<script src="../js/tela_principal.js"></script>
+</body>
+</html>
