@@ -7,17 +7,28 @@ echo       Atualizando projeto TOKI no GitHub
 echo ===========================================
 echo.
 
-:: Navegar para a pasta do projeto (modifique se necessário)
+:: Navegar para a pasta do projeto
 cd /d C:\Projeto_TOKI
 
 :: Pedir mensagem do commit
 set /p msg=Digite a mensagem do commit (ou deixe vazio para padrão): 
-
-:: Usar mensagem padrão se estiver vazio
 if "%msg%"=="" set msg=Atualização automática TOKI
 
-:: Adicionar todos os arquivos
-git add .
+:: Filtrar arquivos grandes (maiores que 90MB)
+for /f "delims=" %%F in ('git ls-files') do (
+    for %%I in ("%%F") do (
+        set "size=%%~zI"
+        setlocal enabledelayedexpansion
+        if !size! GTR 94371840 (
+            echo Ignorando arquivo grande: %%F (!size! bytes)
+            git reset HEAD "%%F" >nul 2>&1
+        )
+        endlocal
+    )
+)
+
+:: Adicionar todos os arquivos restantes
+git add --all
 
 :: Fazer commit (evita erro se não houver alterações)
 git commit -m "%msg%" 2>nul
@@ -42,3 +53,4 @@ if /i "%enviar%"=="S" (
 
 echo.
 pause
+
