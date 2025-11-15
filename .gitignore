@@ -1,9 +1,44 @@
-# IntelliJ / IDE files 
-*.iml 
-.idea/ 
-out/ 
-# Banco de dados local 
-*.mv.db 
-*.trace.db 
-# Arquivos tempor rios 
-*.log 
+# ========================
+# IDE / IntelliJ
+# ========================
+*.iml
+.idea/
+out/
+
+# ========================
+# Banco de dados H2 local
+# ========================
+*.mv.db
+*.trace.db
+
+# ========================
+# Logs e arquivos temporários
+# ========================
+*.log
+*.tmp
+*.temp
+
+# ========================
+# JDK/JRE portátil do projeto
+# ========================
+jdk*/
+jre*/
+*/jdk*/
+*/jre*/
+
+# ========================
+# Maven / Gradle (se houver)
+# ========================
+target/
+*.jar
+*.war
+*.ear
+.mvn/
+build/
+.gradle/
+
+# ========================
+# Sistema operacional
+# ========================
+.DS_Store
+Thumbs.db
