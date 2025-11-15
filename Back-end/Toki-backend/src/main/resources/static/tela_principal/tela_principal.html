@@ -1,43 +1,107 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOKI | Tela Principal</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>TOKI | Calendário</title>
     <link rel="stylesheet" href="../css/tela_principal.css">
 </head>
 <body>
+<div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h1 class="logo">TOKI</h1>
+        <nav class="menu">
+            <button id="btnCalendario" class="active">Calendário</button>
+            <button id="btnLembretes">Lembretes</button>
+        </nav>
+    </aside>
 
-<!-- Painel lateral -->
-<aside class="sidebar">
-    <h2 class="logo">TOKI</h2>
-    <nav>
-        <ul>
-            <li class="active">📅 Agenda</li>
-            <li>🗒️ Eventos</li>
-            <li>👤 Perfil</li>
-            <li><a href="../login_cadastro/login.html" class="logout">🚪 Sair</a></li>
-        </ul>
-    </nav>
-</aside>
+    <!-- Conteúdo principal -->
+    <main class="main">
+        <header class="topbar">
+            <div class="profile-container">
+                <!-- Avatar -->
+                <div class="avatar" id="avatarBtn">
+                    <img id="userAvatar" src="https://via.placeholder.com/40" alt="Avatar">
+                    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                </div>
 
-<!-- Conteúdo principal -->
-<main class="main-content">
-    <header>
-        <h1>Bem-vindo ao TOKI</h1>
-        <p id="nomeUsuario"></p>
-    </header>
+                <!-- Nome e e-mail ao lado do avatar -->
+                <div class="user-info-top">
+                    <span id="userNameTop">Carregando...</span>
+                    <span id="userEmailTop">carregando@toki.com</span>
+                </div>
 
-    <section class="calendar-header">
-        <button id="prev">&#8592;</button>
-        <h2 id="month-year"></h2>
-        <button id="next">&#8594;</button>
-    </section>
+                <!-- Dropdown -->
+                <div class="dropdown" id="dropdownMenu">
+                    <div class="user-info">
+                        <img id="dropdownAvatar" src="https://via.placeholder.com/40" alt="Avatar" class="user-avatar">
+                        <div>
+                            <p class="name" id="userName">Carregando...</p>
+                            <p class="email" id="userEmail">carregando@toki.com</p>
+                        </div>
+                    </div>
+                    <ul>
+                        <li id="changePhotoBtn">Alterar foto</li>
+                        <li onclick="event.stopPropagation(); window.location.href='configuracoes_usuario.html'">Configurações</li>
+                        <li id="toggleTheme">Aparência: Tema do dispositivo</li>
+                        <li>Idioma</li>
+                        <li>Ajuda</li>
+                        <li>Enviar feedback</li>
+                        <li class="logout" id="logoutBtn">Sair</li>
+                    </ul>
+                </div>
+            </div>
+        </header>
 
-    <section id="calendar"></section>
+        <!-- Calendário -->
+        <section class="content" id="calendarSection">
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button id="prevMonth">&lt;</button>
+                    <h2 id="monthYear">Outubro 2025</h2>
+                    <button id="nextMonth">&gt;</button>
+                </div>
+                <div class="calendar-grid" id="calendarDays"></div>
 
-    <button id="add-event">＋ Novo Evento</button>
-</main>
+                <!-- Formulário de Lembrete -->
+                <div id="addReminderContainer" class="config-section" style="display:none;">
+                    <h3>Adicionar Lembrete</h3>
+                    <input type="text" id="reminderTitulo" placeholder="Título do lembrete">
+                    <textarea id="reminderDescricao" placeholder="Descrição do lembrete"></textarea>
+
+                    <label>Data:
+                        <input type="date" id="reminderData">
+                    </label>
+
+                    <label>Prioridade:
+                        <select id="reminderPrioridade">
+                            <option value="1">Normal</option>
+                            <option value="2">Alta</option>
+                            <option value="3">Urgente</option>
+                        </select>
+                    </label>
+
+                    <div class="reminder-buttons" style="margin-top:10px;">
+                        <button id="saveReminderBtn">Salvar</button>
+                        <button id="cancelReminderBtn">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lembretes -->
+        <section class="content" id="reminderSection" style="display:none;">
+            <div class="calendar-container">
+                <div class="reminders">
+                    <h3>Seus Lembretes</h3>
+                    <ul id="reminderList"></ul>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
 
 <script src="../js/tela_principal.js"></script>
 </body>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOKI | Configurações</title>
+    <link rel="stylesheet" href="../css/configuracoes_usuario.css">
+</head>
+<body>
+<div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h1 class="logo">TOKI</h1>
+        <nav class="menu">
+            <button onclick="window.location.href='tela_principal.html'">Calendário</button>
+            <button class="active">Configurações</button>
+        </nav>
+    </aside>
+
+    <!-- Conteúdo principal -->
+    <main class="main">
+        <header class="topbar">
+            <div></div>
+            <div class="profile">
+                <div class="avatar" id="avatarBtn">
+                    <img src="https://via.placeholder.com/40" alt="Avatar">
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo das configurações -->
+        <section class="content">
+            <h2>Configurações do Usuário</h2>
+            <button id="voltarBtn" style="margin-top:10px; background:#133f8a; color:white; border:none; border-radius:6px; padding:8px 15px; cursor:pointer;">
+                ← Voltar para o Calendário
+            </button>
+
+            <p>Gerencie suas preferências no TOKI.</p>
+
+            <div class="config-section">
+                <h3>Tema</h3>
+                <div class="theme-options">
+                    <div class="theme-card" data-theme="light">
+                        <div class="preview light"></div>
+                        <p>Claro</p>
+                    </div>
+                    <div class="theme-card" data-theme="dark">
+                        <div class="preview dark"></div>
+                        <p>Escuro</p>
+                    </div>
+                    <div class="theme-card" data-theme="system">
+                        <div class="preview system"></div>
+                        <p>Sistema</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-section">
+                <h3>Notificações</h3>
+                <label><input type="checkbox" id="notifToggle"> Ativar lembretes automáticos</label>
+            </div>
+
+            <div class="config-section">
+                <h3>Idioma</h3>
+                <select id="languageSelect">
+                    <option value="pt">Português</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="../js/configuracoes_usuario.js"></script>
+</body>
+</html>

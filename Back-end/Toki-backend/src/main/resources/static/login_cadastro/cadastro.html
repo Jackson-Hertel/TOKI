@@ -4,22 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOKI | Cadastro</title>
-    <link rel="stylesheet" href="/css/style.css">
+
+    <link rel="icon" type="image/x-icon" href="../img/icone.ico">
+    <link rel="stylesheet" href="../css/tela_lcr.css">
 </head>
 <body>
-<div class="container">
-    <h1>Cadastro - TOKI</h1>
+
+<div class="auth-container">
+
+    <div class="logo-area">
+        <img src="../img/icone.ico" alt="Logo TOKI">
+    </div>
+
+    <h2>Criar Conta</h2>
+    <p class="subtitle">Organize sua rotina com o TOKI</p>
 
     <form id="formCadastro" class="formulario">
-        <input type="text" id="nome" placeholder="Nome completo" required>
-        <input type="email" id="email" placeholder="E-mail" required>
-        <input type="password" id="senha" placeholder="Senha" required>
-        <button type="submit">Cadastrar</button>
+
+        <div class="input-group">
+            <span class="icon">👤</span>
+            <input type="text" id="nome" placeholder="Seu nome" required>
+        </div>
+
+        <div class="input-group">
+            <span class="icon">📧</span>
+            <input type="email" id="email" placeholder="Seu e-mail" required>
+        </div>
+
+        <div class="input-group">
+            <span class="icon">🔒</span>
+
+            <input type="password" id="senha" placeholder="Crie sua senha" required>
+
+            <img src="../img/eye-closed.png"
+                 class="toggle-password"
+                 data-target="senha"
+                 alt="Mostrar senha">
+        </div>
+
+        <button type="submit" class="btn-primary">Cadastrar</button>
     </form>
 
-    <p>Já tem conta? <a href="/login_cadastro/index.html">Faça login</a></p>
+    <p class="alt"><a href="login.html">Já tenho conta</a></p>
+
 </div>
 
-<script src="/js/cadastro.js"></script>
+<script src="toki_auth.js"></script>
 </body>
 </html>

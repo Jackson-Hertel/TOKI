@@ -4,21 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOKI | Login</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="../css/tela_lcr.css">
+    <link rel="icon" type="image/x-icon" href="../img/icone.ico">
 </head>
 <body>
-<div class="container">
-    <h1>Login - TOKI</h1>
+
+<div class="auth-container">
+
+    <div class="logo-area">
+        <img src="../img/icone.ico" alt="Logo TOKI">
+    </div>
+
+    <h2>Entrar</h2>
+    <p class="subtitle">Acesse sua conta no TOKI</p>
 
     <form id="formLogin" class="formulario">
-        <input type="email" id="email" placeholder="E-mail" required>
-        <input type="password" id="senha" placeholder="Senha" required>
-        <button type="submit">Entrar</button>
+
+        <div class="input-group">
+            <span class="icon">📧</span>
+            <input type="email" id="email" placeholder="E-mail" required>
+        </div>
+
+        <div class="input-group">
+            <span class="icon">🔒</span>
+            <input type="password" id="senha" placeholder="Senha" required>
+
+            <!-- ÍCONE DO OLHO (PRECISA SER IMG) -->
+            <img src="../img/eye-closed.png"
+                 class="toggle-password"
+                 data-target="senha"
+                 id="toggleSenha">
+        </div>
+
+        <button type="submit" class="btn-primary">Entrar</button>
     </form>
 
-    <p>Não tem conta? <a href="/login_cadastro/cadastro.html">Cadastre-se aqui</a></p>
+    <p class="alt"><a href="recuperar.html">Esqueceu sua senha?</a></p>
+    <p class="alt"><a href="cadastro.html">Criar nova conta</a></p>
+
 </div>
 
-<script src="/js/login.js"></script>
+<script src="toki_auth.js"></script>
 </body>
 </html>

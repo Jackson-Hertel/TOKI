@@ -1,11 +1,11 @@
 package br.com.toki.main;
 
 import br.com.toki.service.UsuarioService;
+import br.com.toki.servlet.UsuarioServlet;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import br.com.toki.servlet.UsuarioServlet;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -13,20 +13,28 @@ public class Main {
         service.criarTabela();
 
         Server server = new Server(8080);
-
         ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         handler.setContextPath("/");
 
-        // 👇 SERVE os arquivos do front-end (HTML, CSS, JS) da pasta static
-        handler.setResourceBase(Main.class.getResource("/static").toExternalForm());
-        handler.addServlet(DefaultServlet.class, "/");
+        // ✅ Serve os arquivos do classpath (resources/static) dentro do JAR
+        handler.setBaseResource(
+                org.eclipse.jetty.util.resource.Resource.newClassPathResource("/static")
+        );
 
-        // 👇 Continua servindo o backend normalmente
+        // ✅ Define página inicial
+        handler.setWelcomeFiles(new String[] { "login_cadastro/login.html" });
+
+        // ✅ Serve arquivos estáticos
+        ServletHolder staticHolder = new ServletHolder("default", new DefaultServlet());
+        staticHolder.setInitParameter("dirAllowed", "false");
+        handler.addServlet(staticHolder, "/");
+
+        // ✅ Servlets
         handler.addServlet(new ServletHolder(new UsuarioServlet()), "/api/usuarios/*");
 
         server.setHandler(handler);
         server.start();
-        System.out.println("✅ TOKI rodando em: http://localhost:8080/login_cadastro/login.html");
+        System.out.println("🚀 TOKI rodando em: http://localhost:8080/");
         server.join();
     }
 }

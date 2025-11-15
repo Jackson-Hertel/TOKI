@@ -1,144 +1,299 @@
+/* ===========================
+   TOKI - Estilo com Tema Dinâmico
+   =========================== */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Tema Claro */
+:root {
+  --bg-color: #f3f4f6;
+  --text-color: #000000;
+  --sidebar-bg: #133f8a;
+  --sidebar-text: #ffffff;
+  --topbar-bg: #133f8a;
+  --topbar-text: #ffffff;
+  --card-bg: #ffffff;
+  --button-bg: #1f63d6;
+  --button-text: #ffffff;
+  --btn-edit-bg: #4CAF50;
+  --btn-delete-bg: #f44336;
+}
+
+/* Tema Escuro */
+[data-theme="dark"] {
+  --bg-color: #1b1e22;
+  --text-color: #f1f1f1;
+  --sidebar-bg: #0d2d63;
+  --sidebar-text: #f5f5f5;
+  --topbar-bg: #0d2d63;
+  --topbar-text: #f5f5f5;
+  --card-bg: #2a2e35;
+  --button-bg: #365edc;
+  --button-text: #f5f5f5;
+  --btn-edit-bg: #3aa14b;
+  --btn-delete-bg: #d64545;
+}
+
+/* Layout Geral */
+.app {
+  display: flex;
+  height: 100vh;
 }
 
 body {
-  display: flex;
-  height: 100vh;
-  background-color: #f5f6fa;
+  background-color: var(--bg-color);
+  color: var(--text-color);
 }
 
 /* Sidebar */
 .sidebar {
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
   width: 220px;
-  background-color: white;
-  border-right: 1px solid #e0e0e0;
-  padding: 20px;
-}
-
-.sidebar .logo {
-  color: #1a73e8;
-  font-size: 24px;
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.sidebar ul {
-  list-style: none;
-}
-
-.sidebar ul li {
-  padding: 12px 10px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.sidebar ul li:hover,
-.sidebar ul li.active {
-  background-color: #e8f0fe;
-  color: #1a73e8;
-}
-
-.sidebar ul li a {
-  text-decoration: none;
-  color: inherit;
-  display: block;
-}
-
-/* Conteúdo principal */
-.main-content {
-  flex: 1;
+  padding: 25px 15px;
   display: flex;
   flex-direction: column;
-  padding: 20px 40px;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.menu button {
+  background: none;
+  border: none;
+  color: var(--sidebar-text);
+  padding: 10px;
+  text-align: left;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.menu button:hover,
+.menu .active {
+  background: var(--button-bg);
+}
+
+/* Topbar */
+.topbar {
+  background-color: var(--topbar-bg);
+  color: var(--topbar-text);
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 20px;
   position: relative;
 }
 
-.main-content header {
-  margin-bottom: 10px;
-}
-
-.main-content header h1 {
-  color: #1a73e8;
-  font-size: 28px;
-}
-
-.main-content header p {
-  color: #555;
-}
-
-/* Cabeçalho do calendário */
-.calendar-header {
+.profile-container {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin: 20px 0;
+  gap: 10px;
+  position: relative;
+}
+
+.avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Nome e e-mail ao lado do avatar */
+.user-info-top {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  color: var(--topbar-text);
+}
+
+/* Dropdown */
+.dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 50px;
+  background: var(--card-bg);
+  color: var(--text-color);
+  width: 240px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  z-index: 10;
+}
+
+.dropdown .user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  background: var(--bg-color);
+}
+
+.dropdown .user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.dropdown .name {
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.dropdown .email {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.dropdown ul {
+  list-style: none;
+}
+
+.dropdown li {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dropdown li:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.logout {
+  color: red;
+}
+
+/* Conteúdo principal */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-color);
+}
+
+.content {
+  padding: 25px;
+}
+
+.calendar-container {
+  background: var(--card-bg);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  color: var(--text-color);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .calendar-header button {
-  background-color: #1a73e8;
   border: none;
-  color: white;
-  font-size: 18px;
-  padding: 6px 12px;
+  background: var(--button-bg);
+  color: var(--button-text);
   border-radius: 6px;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
-  transition: 0.3s;
 }
 
-.calendar-header button:hover {
-  background-color: #155ab6;
-}
-
-#month-year {
-  margin: 0 15px;
-  font-size: 22px;
-  color: #333;
-}
-
-/* Calendário */
-#calendar {
+.calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
-  flex-grow: 1;
+  margin: 20px 0;
 }
 
-.day {
-  background-color: white;
+.calendar-grid div {
+  background: rgba(0,0,0,0.05);
+  text-align: center;
+  padding: 15px 0;
   border-radius: 8px;
-  padding: 10px;
-  text-align: right;
-  color: #333;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.day.today {
-  border: 2px solid #1a73e8;
   font-weight: bold;
+  cursor: pointer;
 }
 
-/* Botão de novo evento */
-#add-event {
-  position: absolute;
-  bottom: 30px;
-  right: 30px;
-  background-color: #1a73e8;
-  color: white;
+.calendar-grid div.selected {
+  background: var(--button-bg);
+  color: var(--button-text);
+}
+
+html, body, .sidebar, .topbar, .calendar-container {
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.calendar-grid div.today {
+  border: 2px solid var(--button-bg);
+}
+
+/* Formulário de lembrete */
+#addReminderContainer input,
+#addReminderContainer textarea,
+#addReminderContainer select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Lista de lembretes */
+#reminderList {
+  list-style: none;
+  padding: 0;
+}
+
+.reminder-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card-bg);
+  margin-bottom: 10px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+}
+
+/* Botões de Editar / Excluir */
+.reminder-buttons-item button {
+  margin-left: 5px;
+  padding: 5px 10px;
   border: none;
-  border-radius: 50px;
-  padding: 14px 24px;
-  font-size: 16px;
+  border-radius: 6px;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  color: #fff;
+  font-size: 13px;
   transition: 0.3s;
 }
 
-#add-event:hover {
-  background-color: #155ab6;
+.reminder-buttons-item button:first-child {
+  background-color: var(--btn-edit-bg);
+}
+
+.reminder-buttons-item button:last-child {
+  background-color: var(--btn-delete-bg);
+}
+
+.reminder-buttons-item button:hover {
+  opacity: 0.85;
 }

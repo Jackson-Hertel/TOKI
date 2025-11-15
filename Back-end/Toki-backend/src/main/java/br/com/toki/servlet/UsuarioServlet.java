@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,46 +20,74 @@ public class UsuarioServlet extends HttpServlet {
 
     private void configurarCORS(HttpServletResponse resp) {
         resp.setHeader("Access-Control-Allow-Origin", "*");
-        resp.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        resp.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
         resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
     }
 
     @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         configurarCORS(resp);
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         configurarCORS(resp);
-        List<Usuario> usuarios = service.listarUsuarios();
-        String json = gson.toJson(usuarios);
-        resp.setContentType("application/json");
-        resp.getWriter().write(json);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        configurarCORS(resp);
-
         String path = req.getPathInfo();
-        Usuario usuario = gson.fromJson(req.getReader(), Usuario.class);
+
+        if (path == null || path.equals("/")) {
+            // Retorna todos os usuários (admin ou debug)
+            List<Usuario> usuarios = service.listarUsuarios();
+            resp.setContentType("application/json");
+            resp.getWriter().write(gson.toJson(usuarios));
+            return;
+        }
+
+        if (path.equals("/logado")) {
+            // Retorna o usuário da sessão atual
+            HttpSession session = req.getSession(false);
+            resp.setContentType("application/json");
+            if (session != null && session.getAttribute("usuarioLogado") != null) {
+                Usuario logado = (Usuario) session.getAttribute("usuarioLogado");
+                resp.getWriter().write(gson.toJson(logado));
+            } else {
+                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                resp.getWriter().write("{\"erro\":\"Nenhum usuário logado\"}");
+            }
+            return;
+        }
+
+        resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Endpoint inválido: " + path);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        configurarCORS(resp);
+        String path = req.getPathInfo();
 
         if (path == null) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Endpoint inválido");
             return;
         }
 
+        Usuario usuario = gson.fromJson(req.getReader(), Usuario.class);
+
         switch (path) {
             case "/cadastrar":
                 service.adicionarUsuario(usuario);
                 resp.setStatus(HttpServletResponse.SC_CREATED);
+                resp.getWriter().write("{\"mensagem\":\"Usuário cadastrado com sucesso\"}");
                 break;
 
             case "/login":
                 Usuario existente = service.buscarUsuarioPorEmailESenha(usuario.getEmail(), usuario.getSenha());
                 if (existente != null) {
+                    // Cria sessão e armazena o usuário logado
+                    HttpSession session = req.getSession(true);
+                    session.setAttribute("usuarioLogado", existente);
+
                     resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.setContentType("application/json");
                     resp.getWriter().write(gson.toJson(existente));
                 } else {
                     resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Credenciais inválidas");
@@ -69,5 +98,24 @@ public class UsuarioServlet extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Caminho não encontrado: " + path);
         }
     }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        configurarCORS(resp);
+        String path = req.getPathInfo();
+
+        if ("/logout".equals(path)) {
+            HttpSession session = req.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.getWriter().write("{\"mensagem\":\"Logout realizado com sucesso\"}");
+        } else {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Endpoint inválido para DELETE");
+        }
+    }
 }
+
+
 
