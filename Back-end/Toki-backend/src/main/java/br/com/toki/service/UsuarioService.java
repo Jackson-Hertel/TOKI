@@ -19,8 +19,20 @@ public class UsuarioService {
         return dao.listarUsuarios();
     }
 
-    // 🔹 NOVO MÉTODO: usado no login
+    // 🔹 usado no login
     public Usuario buscarUsuarioPorEmailESenha(String email, String senha) {
         return dao.buscarUsuarioPorEmailESenha(email, senha);
+    }
+
+    // 🔹 novo método para atualizar a foto de perfil
+    public void atualizarFotoPerfil(int usuarioId, String fotoBase64) {
+        dao.atualizarFotoPerfil(usuarioId, fotoBase64);
+    }
+
+    // =====> NOVO MÉTODO
+    public Usuario atualizarUsuario(Usuario usuario) {
+        // Chama o DAO para atualizar os campos no banco
+        dao.atualizarUsuario(usuario);
+        return usuario;
     }
 }

@@ -1,106 +1,93 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="bg-gray-100">
+
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>TOKI | Calendário</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TOKI - Calendário</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="../img/favicon.ico">
     <link rel="stylesheet" href="../css/tela_principal.css">
 </head>
-<body>
-<div class="app">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <h1 class="logo">TOKI</h1>
-        <nav class="menu">
-            <button id="btnCalendario" class="active">Calendário</button>
-            <button id="btnLembretes">Lembretes</button>
-        </nav>
-    </aside>
 
-    <!-- Conteúdo principal -->
-    <main class="main">
-        <header class="topbar">
-            <div class="profile-container">
-                <!-- Avatar -->
-                <div class="avatar" id="avatarBtn">
-                    <img id="userAvatar" src="https://via.placeholder.com/40" alt="Avatar">
-                    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
-                </div>
+<body class="h-screen flex flex-col">
 
-                <!-- Nome e e-mail ao lado do avatar -->
-                <div class="user-info-top">
-                    <span id="userNameTop">Carregando...</span>
-                    <span id="userEmailTop">carregando@toki.com</span>
-                </div>
+<!-- TOPBAR -->
+<div class="flex items-center justify-between bg-white h-16 px-6 shadow">
+    <div class="flex items-center gap-4">
+        <img src="../img/favicon.ico" alt="TOKI" class="w-10 h-10 object-contain">
+        <h1 class="text-xl font-bold">TOKI</h1>
+    </div>
+    <div class="flex items-center gap-4 text-2xl">
+        <div id="settingsBtn" class="cursor-pointer">⚙️</div>
+        <div id="notificationsBtn" class="cursor-pointer">🔔</div>
 
-                <!-- Dropdown -->
-                <div class="dropdown" id="dropdownMenu">
-                    <div class="user-info">
-                        <img id="dropdownAvatar" src="https://via.placeholder.com/40" alt="Avatar" class="user-avatar">
-                        <div>
-                            <p class="name" id="userName">Carregando...</p>
-                            <p class="email" id="userEmail">carregando@toki.com</p>
-                        </div>
-                    </div>
-                    <ul>
-                        <li id="changePhotoBtn">Alterar foto</li>
-                        <li onclick="event.stopPropagation(); window.location.href='configuracoes_usuario.html'">Configurações</li>
-                        <li id="toggleTheme">Aparência: Tema do dispositivo</li>
-                        <li>Idioma</li>
-                        <li>Ajuda</li>
-                        <li>Enviar feedback</li>
-                        <li class="logout" id="logoutBtn">Sair</li>
-                    </ul>
-                </div>
+        <!-- Container de perfil clicável -->
+        <div id="profileContainer" class="w-10 h-10 rounded-full overflow-hidden cursor-pointer relative border-2 border-gray-300 hover:border-blue-500 transition-all">
+            <img id="profileImage" src="../img/default-profile.jpg" alt="Perfil" class="w-full h-full object-cover">
+            <input type="file" id="profileInput" accept="image/*" class="hidden" />
+        </div>
+    </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="flex flex-1 overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-gradient-to-b from-blue-700 to-blue-500 text-white p-6 flex flex-col gap-4">
+        <button id="createEventBtn" class="bg-blue-800 hover:bg-blue-900 font-bold py-3 rounded-lg">+ Criar Evento</button>
+        <button id="showEventsBtn" class="bg-blue-800 hover:bg-blue-900 font-bold py-3 rounded-lg">Eventos</button>
+    </div>
+
+    <!-- CALENDÁRIO CENTRAL -->
+    <div class="flex-1 p-6 overflow-auto bg-white rounded-lg">
+        <div class="flex justify-between items-center text-2xl font-bold mb-4">
+            <span id="calendarMonth">Novembro 2025</span>
+            <div class="flex gap-2">
+                <button id="prevMonth" class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">&lt;</button>
+                <button id="nextMonth" class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">&gt;</button>
             </div>
-        </header>
+        </div>
 
-        <!-- Calendário -->
-        <section class="content" id="calendarSection">
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <button id="prevMonth">&lt;</button>
-                    <h2 id="monthYear">Outubro 2025</h2>
-                    <button id="nextMonth">&gt;</button>
-                </div>
-                <div class="calendar-grid" id="calendarDays"></div>
+        <!-- GRID DO CALENDÁRIO -->
+        <div class="calendar-grid grid grid-cols-7 gap-2"></div>
+    </div>
 
-                <!-- Formulário de Lembrete -->
-                <div id="addReminderContainer" class="config-section" style="display:none;">
-                    <h3>Adicionar Lembrete</h3>
-                    <input type="text" id="reminderTitulo" placeholder="Título do lembrete">
-                    <textarea id="reminderDescricao" placeholder="Descrição do lembrete"></textarea>
+    <!-- RIGHT PANEL -->
+    <div id="rightPanel" class="w-80 bg-gradient-to-b from-blue-700 to-blue-500 text-white p-6 overflow-y-auto hidden">
+        <h2 id="selectedDayTitle" class="text-xl font-bold mb-1">Dia</h2>
+        <p id="selectedDayInfo">0 eventos, 0 tarefas</p>
 
-                    <label>Data:
-                        <input type="date" id="reminderData">
-                    </label>
+        <h3 class="mt-4 font-bold">Próximos eventos</h3>
+        <div id="eventsList" class="mt-2 flex flex-col gap-2"></div>
 
-                    <label>Prioridade:
-                        <select id="reminderPrioridade">
-                            <option value="1">Normal</option>
-                            <option value="2">Alta</option>
-                            <option value="3">Urgente</option>
-                        </select>
-                    </label>
+        <h3 class="mt-4 font-bold">Tarefas Pendentes</h3>
+        <div id="tasksList" class="mt-2 flex flex-col gap-2"></div>
 
-                    <div class="reminder-buttons" style="margin-top:10px;">
-                        <button id="saveReminderBtn">Salvar</button>
-                        <button id="cancelReminderBtn">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <p class="mt-3 cursor-pointer underline" id="addTaskBtn">+ Adicionar Tarefas</p>
 
-        <!-- Lembretes -->
-        <section class="content" id="reminderSection" style="display:none;">
-            <div class="calendar-container">
-                <div class="reminders">
-                    <h3>Seus Lembretes</h3>
-                    <ul id="reminderList"></ul>
-                </div>
-            </div>
-        </section>
-    </main>
+        <h3 class="mt-4 font-bold">Todos Eventos e Tarefas</h3>
+        <div id="eventsTasksList" class="mt-2 flex flex-col gap-2"></div>
+    </div>
+
+</div>
+
+<!-- MODAL CRIAR EVENTO -->
+<div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-96 flex flex-col gap-3">
+        <h2 class="text-xl font-bold mb-2">Criar Evento</h2>
+        <input type="text" id="eventName" placeholder="Nome do Evento" class="w-full px-3 py-2 border rounded" />
+        <input type="time" id="eventTime" class="w-full px-3 py-2 border rounded" />
+        <select id="eventType" class="w-full px-3 py-2 border rounded">
+            <option value="blue">Reunião</option>
+            <option value="purple">Yoga</option>
+            <option value="green">Trabalho</option>
+        </select>
+        <div class="flex justify-end gap-2">
+            <button id="saveEventBtn" class="bg-blue-600 text-white font-bold px-4 py-2 rounded hover:bg-blue-700">Salvar</button>
+            <button id="closeModalBtn" class="px-4 py-2 rounded border hover:bg-gray-100">Cancelar</button>
+        </div>
+    </div>
 </div>
 
 <script src="../js/tela_principal.js"></script>

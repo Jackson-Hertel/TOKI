@@ -30,6 +30,16 @@ public class ConnectionFactory {
         );
         """;
 
+        String sqlUsuarios = """
+        CREATE TABLE IF NOT EXISTS usuario (
+            id IDENTITY PRIMARY KEY,
+            nome VARCHAR(100),
+            email VARCHAR(100) UNIQUE,
+            senha VARCHAR(100),
+            fotoPerfil CLOB
+        );
+        """;
+
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
         } catch (Exception e) {

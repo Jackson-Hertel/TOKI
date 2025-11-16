@@ -1,276 +1,250 @@
-// ==========================
-// TOKI - JS Principal
-// ==========================
+/* ===========================
+   TOKI - Tela Principal JS
+   =========================== */
 
-// === CALENDÁRIO ===
-const calendarDays = document.getElementById("calendarDays");
-const monthYear = document.getElementById("monthYear");
-const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
-  "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-let date = new Date();
+// ===================
+// Elementos DOM
+// ===================
+const calendarGrid = document.querySelector('.calendar-grid');
+const calendarMonth = document.getElementById('calendarMonth');
+const prevMonthBtn = document.getElementById('prevMonth');
+const nextMonthBtn = document.getElementById('nextMonth');
+
+const rightPanel = document.getElementById('rightPanel');
+const selectedDayTitle = document.getElementById('selectedDayTitle');
+const selectedDayInfo = document.getElementById('selectedDayInfo');
+const eventsList = document.getElementById('eventsList');
+const tasksList = document.getElementById('tasksList');
+const eventsTasksList = document.getElementById('eventsTasksList');
+
+const createEventBtn = document.getElementById('createEventBtn');
+const settingsBtn = document.getElementById('settingsBtn');
+
+const profileContainer = document.getElementById('profileContainer');
+const profileInput = document.getElementById('profileInput');
+const profileImage = document.getElementById('profileImage');
+
+const eventModal = document.getElementById('eventModal');
+const saveEventBtn = document.getElementById('saveEventBtn');
+const closeModalBtn = document.getElementById('closeModalBtn');
+
+// ===================
+// Variáveis
+// ===================
 let today = new Date();
-let selectedDate = null;
+let currentMonth = today.getMonth();
+let currentYear = today.getFullYear();
+let selectedCell = null;
+let selectedDateKey = null;
 
-// Renderiza calendário
-function renderCalendar() {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    monthYear.textContent = `${months[month]} ${year}`;
+let events = {};
+let tasks = {};
+let usuarioLogado = null;
+
+// ===================
+// Funções do Calendário
+// ===================
+function renderCalendar(month, year) {
+    calendarGrid.innerHTML = '';
 
     const firstDay = new Date(year, month, 1).getDay();
     const lastDate = new Date(year, month + 1, 0).getDate();
-    calendarDays.innerHTML = "";
+
+    const monthNames = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+        "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    calendarMonth.textContent = `${monthNames[month]} ${year}`;
+
+    const weekDays = ["DOM","SEG","TER","QUA","QUI","SEX","SAB"];
+    weekDays.forEach(day => {
+        const div = document.createElement('div');
+        div.textContent = day;
+        div.classList.add('font-bold','text-center');
+        calendarGrid.appendChild(div);
+    });
 
     for (let i = 0; i < firstDay; i++) {
-        const empty = document.createElement("div");
-        empty.classList.add("empty");
-        calendarDays.appendChild(empty);
+        calendarGrid.appendChild(document.createElement('div'));
     }
 
-    for (let d = 1; d <= lastDate; d++) {
-        const day = document.createElement("div");
-        day.textContent = d;
+    for (let day = 1; day <= lastDate; day++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.classList.add('cursor-pointer','p-3','rounded','text-center','hover:bg-gray-200');
+        dayDiv.textContent = day;
 
-        if(d === today.getDate() && month === today.getMonth() && year === today.getFullYear()){
-            day.classList.add("today");
+        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+            dayDiv.classList.add('today','border','border-blue-600','font-bold','text-blue-600');
         }
 
-        day.addEventListener("click", () => {
-            document.querySelectorAll(".calendar-grid div").forEach(el => el.classList.remove("selected"));
-            day.classList.add("selected");
-            selectedDate = new Date(year, month, d);
-            openReminderForm(selectedDate);
-        });
-
-        calendarDays.appendChild(day);
+        dayDiv.addEventListener('click', () => toggleDay(dayDiv, day, month, year));
+        calendarGrid.appendChild(dayDiv);
     }
 }
 
-// Abrir formulário de lembrete
-function openReminderForm(date){
-    const form = document.getElementById("addReminderContainer");
-    form.style.display = "block";
-    const dateInput = document.getElementById("reminderData");
-    dateInput.value = date.toISOString().split("T")[0];
-}
-
-// Fechar formulário
-document.getElementById("cancelReminderBtn").addEventListener("click", ()=>{
-    document.getElementById("addReminderContainer").style.display="none";
-    document.getElementById("saveReminderBtn").textContent = "Salvar";
-    document.getElementById("saveReminderBtn").onclick = salvarLembrete;
-});
-
-// === DROPDOWN DE PERFIL ===
-const avatarBtn = document.getElementById("avatarBtn");
-const dropdownMenu = document.getElementById("dropdownMenu");
-if(avatarBtn && dropdownMenu){
-    avatarBtn.addEventListener("click", e=>{
-        e.stopPropagation();
-        dropdownMenu.style.display = dropdownMenu.style.display==="block"?"none":"block";
-    });
-    window.addEventListener("click", e=>{
-        if(!e.target.closest(".profile-container")) dropdownMenu.style.display="none";
-    });
-}
-
-// === AVATAR ===
-const avatarInput = document.getElementById("avatarInput");
-const userAvatar = document.getElementById("userAvatar");
-const dropdownAvatar = document.getElementById("dropdownAvatar");
-const changePhotoBtn = document.getElementById("changePhotoBtn");
-const savedAvatar = localStorage.getItem("toki-avatar");
-if(savedAvatar){userAvatar.src=savedAvatar; dropdownAvatar.src=savedAvatar;}
-if(changePhotoBtn) changePhotoBtn.addEventListener("click", ()=>avatarInput.click());
-if(avatarInput){
-    avatarInput.addEventListener("change", ()=>{
-        const file = avatarInput.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = e=>{
-            const imgData = e.target.result;
-            userAvatar.src = imgData; dropdownAvatar.src = imgData;
-            localStorage.setItem("toki-avatar", imgData);
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-// === USUÁRIO LOGADO ===
-async function carregarUsuarioLogado(){
-    const nameElem = document.getElementById("userName");
-    const emailElem = document.getElementById("userEmail");
-    const nameTop = document.getElementById("userNameTop");
-    const emailTop = document.getElementById("userEmailTop");
-    try{
-        const res = await fetch("http://localhost:8080/api/usuarios/logado");
-        if(!res.ok) throw new Error("Usuário não logado");
-        const usuario = await res.json();
-        const nome = usuario.nome || "Usuário";
-        const email = usuario.email || "sememail@toki.com";
-        nameElem.textContent = nome; emailElem.textContent = email;
-        nameTop.textContent = nome; emailTop.textContent = email;
-        localStorage.setItem("toki-nome",nome);
-        localStorage.setItem("toki-email",email);
-    }catch{
-        const nomeSalvo = localStorage.getItem("toki-nome")||"Usuário";
-        const emailSalvo = localStorage.getItem("toki-email")||"sememail@toki.com";
-        nameElem.textContent = nomeSalvo; emailElem.textContent = emailSalvo;
-        nameTop.textContent = nomeSalvo; emailTop.textContent = emailSalvo;
+function toggleDay(cell, day, month, year) {
+    if (selectedCell === cell) {
+        cell.classList.remove('selected');
+        selectedCell = null;
+        rightPanel.classList.add('hidden');
+        selectedDateKey = null;
+    } else {
+        if (selectedCell) selectedCell.classList.remove('selected');
+        cell.classList.add('selected');
+        selectedCell = cell;
+        selectedDateKey = `${year}-${(month+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
+        rightPanel.classList.remove('hidden');
+        selectedDayTitle.textContent = `${day}/${month+1}/${year}`;
+        updateRightPanel();
     }
 }
 
-// === TEMA ===
-function applyTheme(theme){
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("toki-theme", theme);
-}
-(function initTheme(){
-    const saved = localStorage.getItem("toki-theme")||"system";
-    let finalTheme = saved;
-    if(saved==="system") finalTheme = window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
-    applyTheme(finalTheme);
-})();
-const toggleThemeBtn = document.getElementById("toggleTheme");
-if(toggleThemeBtn) toggleThemeBtn.addEventListener("click", ()=>{
-    const current = document.documentElement.getAttribute("data-theme");
-    applyTheme(current==="dark"?"light":"dark");
-});
-
-// === ALTERNAR CALENDÁRIO / LEMBRETES ===
-const btnCalendario = document.getElementById("btnCalendario");
-const btnLembretes = document.getElementById("btnLembretes");
-const calendarSection = document.getElementById("calendarSection");
-const reminderSection = document.getElementById("reminderSection");
-
-function showCalendar(){
-    calendarSection.style.display="block";
-    reminderSection.style.display="none";
-    btnCalendario.classList.add("active");
-    btnLembretes.classList.remove("active");
-}
-function showReminders(){
-    calendarSection.style.display="none";
-    reminderSection.style.display="block";
-    btnLembretes.classList.add("active");
-    btnCalendario.classList.remove("active");
-    carregarLembretes();
-}
-btnCalendario.addEventListener("click", showCalendar);
-btnLembretes.addEventListener("click", showReminders);
-showCalendar();
-
-// === CARREGAR LEMBRETES COM EDITAR/EXCLUIR ===
-const reminderList = document.getElementById("reminderList");
-
-async function carregarLembretes() {
-    try {
-        const res = await fetch("http://localhost:8080/toki/evento");
-        if (!res.ok) throw new Error("Erro ao carregar eventos");
-        const eventos = await res.json();
-        reminderList.innerHTML = "";
-
-        eventos.forEach(ev => {
-            const li = document.createElement("li");
-            li.classList.add("reminder-item");
-
-            const textDiv = document.createElement("div");
-            textDiv.textContent = `${ev.titulo} - ${ev.descricao} (${ev.data})`;
-            li.appendChild(textDiv);
-
-            const btnContainer = document.createElement("div");
-            btnContainer.classList.add("reminder-buttons-item");
-
-            const editBtn = document.createElement("button");
-            editBtn.textContent = "Editar";
-            editBtn.addEventListener("click", () => editarLembrete(ev));
-
-            const deleteBtn = document.createElement("button");
-            deleteBtn.textContent = "Excluir";
-            deleteBtn.addEventListener("click", () => excluirLembrete(ev.id));
-
-            btnContainer.appendChild(editBtn);
-            btnContainer.appendChild(deleteBtn);
-            li.appendChild(btnContainer);
-
-            reminderList.appendChild(li);
+function updateRightPanel() {
+    eventsList.innerHTML = '';
+    if (events[selectedDateKey]) {
+        events[selectedDateKey].forEach(ev => {
+            const div = document.createElement('div');
+            div.textContent = `${ev.hora} - ${ev.nome}`;
+            div.classList.add('p-2','bg-white','text-black','rounded');
+            eventsList.appendChild(div);
         });
-    } catch (err) {
-        console.error(err);
+    } else {
+        eventsList.innerHTML = '<p class="text-sm">Nenhum evento</p>';
     }
-}
 
-// Salvar lembrete
-async function salvarLembrete() {
-    const titulo = document.getElementById("reminderTitulo").value.trim();
-    const descricao = document.getElementById("reminderDescricao").value.trim();
-    const data = document.getElementById("reminderData").value;
-    const prioridade = parseInt(document.getElementById("reminderPrioridade").value);
-
-    if (!titulo || !descricao || !data) return alert("Preencha todos os campos.");
-
-    try {
-        const res = await fetch("http://localhost:8080/toki/evento", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ titulo, descricao, data, prioridade })
+    tasksList.innerHTML = '';
+    if (tasks[selectedDateKey]) {
+        tasks[selectedDateKey].forEach(tsk => {
+            const div = document.createElement('div');
+            div.textContent = tsk;
+            div.classList.add('p-2','bg-white','text-black','rounded');
+            tasksList.appendChild(div);
         });
-        if (!res.ok) throw new Error("Erro ao salvar lembrete");
-        alert("Lembrete salvo!");
-        document.getElementById("addReminderContainer").style.display = "none";
-        carregarLembretes();
-    } catch (err) { console.error(err); }
-}
+    } else {
+        tasksList.innerHTML = '<p class="text-sm">Nenhuma tarefa</p>';
+    }
 
-// Editar lembrete
-function editarLembrete(ev) {
-    document.getElementById("addReminderContainer").style.display = "block";
-    document.getElementById("reminderTitulo").value = ev.titulo;
-    document.getElementById("reminderDescricao").value = ev.descricao;
-    document.getElementById("reminderData").value = ev.data;
-    document.getElementById("reminderPrioridade").value = ev.prioridade;
-    selectedDate = new Date(ev.data);
-
-    const saveBtn = document.getElementById("saveReminderBtn");
-    saveBtn.textContent = "Atualizar";
-    saveBtn.onclick = async () => {
-        const titulo = document.getElementById("reminderTitulo").value.trim();
-        const descricao = document.getElementById("reminderDescricao").value.trim();
-        const data = document.getElementById("reminderData").value;
-        const prioridade = parseInt(document.getElementById("reminderPrioridade").value);
-
-        if (!titulo || !descricao || !data) return alert("Preencha todos os campos.");
-
-        try {
-            const res = await fetch(`http://localhost:8080/toki/evento/${ev.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ titulo, descricao, data, prioridade })
+    eventsTasksList.innerHTML = '';
+    if ((events[selectedDateKey]?.length || 0) + (tasks[selectedDateKey]?.length || 0) > 0) {
+        if (events[selectedDateKey]) {
+            events[selectedDateKey].forEach(ev => {
+                const div = document.createElement('div');
+                div.textContent = `Evento: ${ev.hora} - ${ev.nome}`;
+                div.classList.add('p-2','bg-white','text-black','rounded');
+                eventsTasksList.appendChild(div);
             });
-            if (!res.ok) throw new Error("Erro ao atualizar lembrete");
-            alert("Lembrete atualizado!");
-            document.getElementById("addReminderContainer").style.display = "none";
-            saveBtn.textContent = "Salvar";
-            saveBtn.onclick = salvarLembrete;
-            carregarLembretes();
-        } catch (err) { console.error(err); }
-    };
+        }
+        if (tasks[selectedDateKey]) {
+            tasks[selectedDateKey].forEach(tsk => {
+                const div = document.createElement('div');
+                div.textContent = `Tarefa: ${tsk}`;
+                div.classList.add('p-2','bg-white','text-black','rounded');
+                eventsTasksList.appendChild(div);
+            });
+        }
+    } else {
+        eventsTasksList.innerHTML = '<p class="text-sm">Nenhum evento ou tarefa</p>';
+    }
+
+    selectedDayInfo.textContent = `${events[selectedDateKey]?.length || 0} eventos, ${tasks[selectedDateKey]?.length || 0} tarefas`;
 }
 
-// Excluir lembrete
-async function excluirLembrete(id) {
-    if (!confirm("Deseja realmente excluir este lembrete?")) return;
+// ===================
+// Navegação de meses
+// ===================
+prevMonthBtn.addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    renderCalendar(currentMonth, currentYear);
+});
+
+nextMonthBtn.addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendar(currentMonth, currentYear);
+});
+
+// ===================
+// Modal de evento
+// ===================
+createEventBtn.addEventListener('click', () => {
+    if (!selectedDateKey) return alert('Selecione um dia antes!');
+    document.getElementById('eventName').value = '';
+    document.getElementById('eventTime').value = '';
+    document.getElementById('eventType').value = 'blue';
+    eventModal.classList.remove('hidden');
+});
+
+closeModalBtn.addEventListener('click', () => eventModal.classList.add('hidden'));
+
+saveEventBtn.addEventListener('click', () => {
+    const name = document.getElementById('eventName').value.trim();
+    const time = document.getElementById('eventTime').value;
+    const type = document.getElementById('eventType').value;
+    if (!name || !time) return alert('Preencha nome e horário do evento!');
+    if (!events[selectedDateKey]) events[selectedDateKey] = [];
+    events[selectedDateKey].push({ nome: name, hora: time, tipo: type });
+    eventModal.classList.add('hidden');
+    updateRightPanel();
+});
+
+// ===================
+// Configurações
+// ===================
+settingsBtn.addEventListener('click', () => {
+    window.location.href = 'configuracoes_usuario.html';
+});
+
+// ===================
+// Perfil e foto
+// ===================
+profileContainer.addEventListener('click', () => profileInput.click());
+
+profileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file || !usuarioLogado) return;
+
+    const formData = new FormData();
+    formData.append('fotoPerfil', file);
+
     try {
-        const res = await fetch(`http://localhost:8080/toki/evento/${id}`, {
-            method: "DELETE"
+        const res = await fetch('/api/usuarios/upload', {
+            method: 'POST',
+            credentials: 'include',
+            body: formData
         });
-        if (!res.ok) throw new Error("Erro ao excluir lembrete");
-        alert("Lembrete excluído!");
-        carregarLembretes();
-    } catch (err) { console.error(err); }
+        if (res.ok) {
+            const data = await res.json();
+            // Atualiza apenas com o caminho do arquivo, não Base64
+            profileImage.src = data.caminho;
+            usuarioLogado.fotoPerfil = data.caminho;
+        } else {
+            console.error('Erro ao atualizar foto');
+        }
+    } catch (err) {
+        console.error('Erro na requisição:', err);
+    }
+});
+
+// ===================
+// Carregar usuário logado
+// ===================
+async function carregarUsuarioLogado() {
+    try {
+        const res = await fetch('/api/usuarios/logado', { credentials: 'include' });
+        if (res.ok) {
+            usuarioLogado = await res.json();
+            if (usuarioLogado.fotoPerfil) profileImage.src = usuarioLogado.fotoPerfil;
+        } else {
+            console.warn('Nenhum usuário logado');
+        }
+    } catch (err) {
+        console.error('Erro ao carregar usuário logado:', err);
+    }
 }
 
+// ===================
 // Inicialização
-renderCalendar();
-carregarUsuarioLogado();
-carregarLembretes();
+// ===================
+window.addEventListener('DOMContentLoaded', () => {
+    carregarUsuarioLogado();
+    renderCalendar(currentMonth, currentYear);
+});

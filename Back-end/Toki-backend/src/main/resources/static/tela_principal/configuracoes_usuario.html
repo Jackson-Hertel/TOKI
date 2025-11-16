@@ -4,73 +4,162 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOKI | Configurações</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- CSS Customizado -->
     <link rel="stylesheet" href="../css/configuracoes_usuario.css">
 </head>
-<body>
-<div class="app">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <h1 class="logo">TOKI</h1>
-        <nav class="menu">
-            <button onclick="window.location.href='tela_principal.html'">Calendário</button>
-            <button class="active">Configurações</button>
-        </nav>
-    </aside>
+<body class="toki-theme bg-gray-100 text-gray-900">
 
-    <!-- Conteúdo principal -->
-    <main class="main">
-        <header class="topbar">
-            <div></div>
-            <div class="profile">
-                <div class="avatar" id="avatarBtn">
-                    <img src="https://via.placeholder.com/40" alt="Avatar">
-                </div>
+<div class="config-container w-full max-w-3xl bg-white shadow-xl rounded-xl p-8 mx-auto my-12">
+
+    <h1 class="config-title text-3xl font-bold mb-8 text-gray-900 text-center">
+        Configurações do Usuário
+    </h1>
+
+    <!-- ================== PERFIL ================== -->
+    <section id="perfil" class="config-section mb-10">
+
+        <h2 id="nomeUsuario" class="section-title text-xl font-semibold text-gray-800 mb-2">
+            👤 Perfil do Usuário
+        </h2>
+        <p class="section-desc text-gray-600 mb-6">Edite suas informações pessoais e foto de perfil.</p>
+
+        <!-- FOTO DE PERFIL -->
+        <div class="w-full flex justify-center mb-6">
+            <label for="fotoInput" class="cursor-pointer">
+                <img id="fotoPreview"
+                     src="../img/default_profile.png"
+                     class="w-28 h-28 rounded-full shadow-md object-cover border-2 border-blue-400 hover:border-blue-600 transition">
+            </label>
+            <input type="file" id="fotoInput" accept="image/*" hidden>
+        </div>
+
+        <!-- Campos do Perfil -->
+        <div class="space-y-4">
+            <div class="input-group">
+                <label class="block font-medium">Nome</label>
+                <input type="text" id="nome" class="mt-1 w-full border rounded-lg p-2">
             </div>
-        </header>
 
-        <!-- Conteúdo das configurações -->
-        <section class="content">
-            <h2>Configurações do Usuário</h2>
-            <button id="voltarBtn" style="margin-top:10px; background:#133f8a; color:white; border:none; border-radius:6px; padding:8px 15px; cursor:pointer;">
-                ← Voltar para o Calendário
+            <div class="input-group">
+                <label class="block font-medium">E-mail</label>
+                <input type="email" id="email" class="mt-1 w-full border rounded-lg p-2">
+            </div>
+
+            <div class="input-group">
+                <label class="block font-medium">Senha Atual</label>
+                <input type="password" id="senhaAtual" class="mt-1 w-full border rounded-lg p-2">
+            </div>
+
+            <div class="input-group">
+                <label class="block font-medium">Nova Senha</label>
+                <input type="password" id="novaSenha" class="mt-1 w-full border rounded-lg p-2">
+            </div>
+
+            <div class="input-group">
+                <label class="block font-medium">Confirmar Nova Senha</label>
+                <input type="password" id="confirmarSenha" class="mt-1 w-full border rounded-lg p-2">
+            </div>
+
+            <button id="btnSalvarPerfil"
+                    class="btn-primary bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 w-full">
+                Salvar Perfil
             </button>
+        </div>
+    </section>
 
-            <p>Gerencie suas preferências no TOKI.</p>
+    <!-- ================== APARÊNCIA ================== -->
+    <section id="tema" class="config-section mb-10">
+        <h2 class="section-title text-xl font-semibold text-gray-800 mb-2">🎨 Aparência</h2>
+        <p class="section-desc text-gray-600 mb-4">Escolha temas e cores para personalizar seu TOKI.</p>
 
-            <div class="config-section">
-                <h3>Tema</h3>
-                <div class="theme-options">
-                    <div class="theme-card" data-theme="light">
-                        <div class="preview light"></div>
-                        <p>Claro</p>
-                    </div>
-                    <div class="theme-card" data-theme="dark">
-                        <div class="preview dark"></div>
-                        <p>Escuro</p>
-                    </div>
-                    <div class="theme-card" data-theme="system">
-                        <div class="preview system"></div>
-                        <p>Sistema</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="config-section">
-                <h3>Notificações</h3>
-                <label><input type="checkbox" id="notifToggle"> Ativar lembretes automáticos</label>
-            </div>
-
-            <div class="config-section">
-                <h3>Idioma</h3>
-                <select id="languageSelect">
-                    <option value="pt">Português</option>
-                    <option value="en">English</option>
+        <div class="space-y-4">
+            <div class="input-group">
+                <label class="block font-medium">Tema do Sistema</label>
+                <select id="temaSelect" class="border rounded-lg p-2 mt-1 w-full">
+                    <option value="claro">Tema Claro</option>
+                    <option value="escuro">Tema Escuro</option>
+                    <option value="auto">Automático</option>
                 </select>
             </div>
-        </section>
-    </main>
+
+            <div class="input-group">
+                <label class="block font-medium">Cor Principal</label>
+                <select id="corPrincipal" class="border rounded-lg p-2 mt-1 w-full">
+                    <option value="azul">Azul</option>
+                    <option value="roxo">Roxo</option>
+                    <option value="verde">Verde</option>
+                    <option value="laranja">Laranja</option>
+                </select>
+            </div>
+
+            <button id="btnSalvarAparencia"
+                    class="btn-primary bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 w-full">
+                Salvar Aparência
+            </button>
+        </div>
+    </section>
+
+    <!-- ================== CALENDÁRIO ================== -->
+    <section id="calendario" class="config-section mb-10">
+        <h2 class="section-title text-xl font-semibold text-gray-800 mb-2">📆 Preferências do Calendário</h2>
+        <p class="section-desc text-gray-600 mb-4">Controle o que aparece no seu calendário.</p>
+
+        <div class="space-y-4">
+            <div class="input-group">
+                <label class="block font-medium">Início da semana</label>
+                <select id="inicioSemana" class="border rounded-lg p-2 mt-1 w-full">
+                    <option value="domingo">Domingo</option>
+                    <option value="segunda">Segunda</option>
+                </select>
+            </div>
+
+            <div class="option-grid grid grid-cols-2 gap-4">
+                <label><input type="checkbox" id="feriados"> Mostrar feriados</label>
+                <label><input type="checkbox" id="aniversarios"> Mostrar aniversários</label>
+                <label><input type="checkbox" id="concluidos"> Mostrar concluídos</label>
+            </div>
+
+            <button id="btnSalvarCalendario"
+                    class="btn-primary bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 w-full mt-4">
+                Salvar Calendário
+            </button>
+        </div>
+    </section>
+
+    <!-- ================== PRIVACIDADE ================== -->
+    <section class="config-section">
+        <h2 class="section-title text-xl font-semibold text-gray-800 mb-2">🔒 Dados e Privacidade</h2>
+        <p class="section-desc text-gray-600 mb-4">Gerencie segurança, exportações e backups.</p>
+
+        <div class="option-grid grid grid-cols-2 gap-4 mb-6">
+            <button id="baixarDados" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                Baixar Meus Dados
+            </button>
+            <button id="exportarCSV" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                Exportar CSV
+            </button>
+            <button id="backup" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                Backup
+            </button>
+            <button id="excluirEventos" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                Excluir Eventos
+            </button>
+        </div>
+
+        <button id="excluirConta"
+                class="btn-danger bg-red-600 text-white px-5 py-3 rounded-lg hover:bg-red-700 w-full">
+            Excluir Conta
+        </button>
+    </section>
+
 </div>
 
+<!-- JS Customizado -->
 <script src="../js/configuracoes_usuario.js"></script>
+
 </body>
 </html>
