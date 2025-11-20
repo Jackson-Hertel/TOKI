@@ -1,201 +1,136 @@
-/* ===========================
-   TOKI - Estilo Completo
-   =========================== */
+:root {
+  --toki-primary: #137fec;
+  --bg-light: #f7fafc;
+  --card-light: #ffffff;
+  --text-light: #0f1724;
+  --muted-light: #475569;
 
-/* Reset e fonte */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
+  --bg-dark: #071229;
+  --card-dark: #0b1220;
+  --text-dark: #cfe8ff;
+  --muted-dark: #93b3d8;
 }
 
-/* Layout geral */
-body {
-    background-color: #f3f4f6;
-    color: #111;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+/* Aplica modo dark quando <html data-theme="dark"> */
+html[data-theme="dark"] {
+  background: var(--bg-dark);
+  color: var(--text-dark);
 }
 
-/* ===========================
-   Topbar
-   =========================== */
-.flex.items-center.justify-between.bg-white.h-16.px-6.shadow {
-    background-color: #ffffff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+html[data-theme="light"] {
+  background: var(--bg-light);
+  color: var(--text-light);
 }
 
-/* ===========================
-   Sidebar
-   =========================== */
-.w-64.bg-gradient-to-b.from-blue-700.to-blue-500 {
-    background: linear-gradient(to bottom, #1e3a8a, #3b82f6);
-    color: white;
+/* helpers */
+* { box-sizing: border-box; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+
+body { margin: 0; }
+
+/* card */
+.card {
+  background: var(--card-light);
+  border: 1px solid rgba(2,6,23,0.04);
+  padding: 1rem;
+  border-radius: .75rem;
+}
+html[data-theme="dark"] .card {
+  background: var(--card-dark);
+  border-color: rgba(255,255,255,0.04);
 }
 
-.w-64 button {
-    width: 100%;
-    font-weight: bold;
-    padding: 0.75rem 0;
-    border-radius: 0.5rem;
-    transition: 0.2s;
+/* tab-btn */
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .6rem .8rem;
+  border-radius: .6rem;
+  transition: background .15s, color .15s;
+  color: var(--muted-light);
+  background: transparent;
+  font-weight: 500;
+}
+html[data-theme="dark"] .tab-btn { color: var(--muted-dark); }
+
+.tab-btn:hover {
+  background: rgba(2,6,23,0.04);
+}
+html[data-theme="dark"] .tab-btn:hover {
+  background: rgba(255,255,255,0.03);
 }
 
-.w-64 button:hover {
-    opacity: 0.9;
+.tab-active {
+  background: rgba(19,127,236,0.12);
+  color: var(--toki-primary);
+  font-weight: 600;
 }
 
-/* ===========================
-   Calendário Central
-   =========================== */
-.flex-1.p-6.overflow-auto.bg-white {
-    background-color: #ffffff;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
+/* tab panel animation */
+.tab-panel { animation: fade .22s ease; padding: 0.25rem 0; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* titulo */
+.titulo { font-size: 1.25rem; font-weight: 700; margin-bottom: .75rem; }
+
+/* inputs */
+.input {
+  height: 42px;
+  border-radius: .6rem;
+  padding: .4rem .75rem;
+  border: 1px solid #cbd5e1;
+  background: white;
+  width: 100%;
+  color: inherit;
+}
+html[data-theme="dark"] .input {
+  background: #071426;
+  border-color: #22303b;
+  color: var(--text-dark);
 }
 
-/* Grid do calendário */
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0.5rem;
+/* labels */
+.label-input { display: flex; flex-direction: column; gap: .4rem; font-size: .95rem; }
+
+/* buttons */
+.btn-primary {
+  background: var(--toki-primary);
+  color: #fff;
+  padding: .5rem .9rem;
+  border-radius: .6rem;
+}
+.btn-primary:hover { filter: brightness(.95); }
+
+.btn-sec {
+  background: #eef2f7;
+  color: #0f1724;
+  padding: .5rem .9rem;
+  border-radius: .6rem;
+}
+html[data-theme="dark"] .btn-sec { background: rgba(255,255,255,0.03); color: var(--text-dark); }
+
+/* switches */
+.switch { position: relative; width: 46px; height: 26px; display: inline-block; }
+.switch input { display: none; }
+.slider {
+  position: absolute; inset: 0; background: #cbd5e1; border-radius: 999px; transition: background .18s;
+}
+.slider::before {
+  content: ""; position: absolute; width: 20px; height: 20px; background: white; border-radius: 999px; top: 3px; left: 3px; transition: transform .18s;
+  box-shadow: 0 4px 8px rgba(2,6,23,0.12);
+}
+.switch input:checked + .slider { background: var(--toki-primary); }
+.switch input:checked + .slider::before { transform: translateX(20px); }
+
+/* color dots */
+.color-dot { width: 2rem; height: 2rem; border-radius: 999px; border: 2px solid rgba(0,0,0,0.06); box-shadow: 0 2px 6px rgba(2,6,23,0.06); }
+html[data-theme="dark"] .color-dot { border: 2px solid rgba(255,255,255,0.06); }
+
+/* small responsive */
+@media (max-width: 768px) {
+  aside { width: 100%; }
+  .tab-panel { padding-bottom: 3rem; }
 }
 
-.calendar-grid div {
-    text-align: center;
-    padding: 1rem 0;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 0.25rem;
-    transition: 0.2s;
-}
-
-.calendar-grid div:hover {
-    background-color: #e0e7ff;
-}
-
-/* Dia selecionado */
-.calendar-grid div.selected {
-    background-color: #2563eb;
-    color: white;
-}
-
-/* Dia de hoje */
-.calendar-grid div.today {
-    border: 2px solid #2563eb;
-    color: #2563eb;
-    font-weight: bold;
-}
-
-/* ===========================
-   Painel Direito
-   =========================== */
-#rightPanel {
-    width: 20rem;
-    padding: 1.5rem;
-    overflow-y: auto;
-    background: linear-gradient(to bottom, #1e3a8a, #3b82f6);
-    color: white;
-}
-
-#rightPanel h2,
-#rightPanel h3 {
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-}
-
-#rightPanel p {
-    margin-bottom: 0.5rem;
-}
-
-#rightPanel div {
-    background-color: white;
-    color: black;
-    border-radius: 0.375rem;
-    padding: 0.5rem 0.75rem;
-}
-
-/* ===========================
-   Modal Criar Evento
-   =========================== */
-#eventModal {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-}
-
-#eventModal > div {
-    background-color: white;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    width: 24rem;
-}
-
-#eventModal input,
-#eventModal select {
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    margin-bottom: 0.75rem;
-    border-radius: 0.375rem;
-    border: 1px solid #ccc;
-}
-
-#eventModal button {
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-#saveEventBtn {
-    background-color: #2563eb;
-    color: white;
-}
-
-#saveEventBtn:hover {
-    background-color: #1d4ed8;
-}
-
-#closeModalBtn {
-    border: 1px solid #ccc;
-}
-
-#closeModalBtn:hover {
-    background-color: #f3f4f6;
-}
-
-/* ===========================
-   Pequenas melhorias visuais
-   =========================== */
-p.cursor-pointer.underline:hover {
-    opacity: 0.85;
-    transition: 0.2s;
-}
-
-/* ===========================
-   Imagem de perfil
-   =========================== */
-#profileContainer img {
-    object-fit: cover;
-}
-
-/* ===========================
-   Botões do calendário (navegação)
-   =========================== */
-#prevMonth, #nextMonth {
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.25rem;
-    background-color: #e5e7eb;
-    transition: 0.2s;
-}
-
-#prevMonth:hover, #nextMonth:hover {
-    background-color: #d1d5db;
-}
+/* utility */
+.opacity-70 { opacity: .7; }

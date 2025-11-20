@@ -1,44 +1,37 @@
 package br.com.toki.main;
 
-import br.com.toki.service.UsuarioService;
 import br.com.toki.servlet.UsuarioServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.resource.Resource;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        // Cria a tabela de usuários se não existir
-        UsuarioService service = new UsuarioService();
-        service.criarTabela();
 
-        // Cria o servidor Jetty na porta 8080
+        // Cria servidor na porta 8080
         Server server = new Server(8080);
 
-        // Handler com sessões
-        ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        handler.setContextPath("/");
+        // Contexto principal
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
 
-        // Define o recurso base para os arquivos estáticos (classpath /static)
-        handler.setBaseResource(Resource.newClassPathResource("/static"));
-
-        // Define a página inicial
-        handler.setWelcomeFiles(new String[]{"login_cadastro/login.html"});
-
-        // DefaultServlet para servir arquivos estáticos
+        // Configura caminho para recursos estáticos (front-end)
         ServletHolder defaultServlet = new ServletHolder("default", DefaultServlet.class);
-        defaultServlet.setInitParameter("dirAllowed", "true"); // permite listar diretórios (opcional)
-        handler.addServlet(defaultServlet, "/");
+        // Diretório base para arquivos estáticos: src/main/resources/static
+        defaultServlet.setInitParameter("resourceBase", Main.class.getClassLoader().getResource("static").toExternalForm());
+        defaultServlet.setInitParameter("dirAllowed", "true"); // Permite navegação por pastas
+        context.addServlet(defaultServlet, "/"); // Servir todos arquivos a partir da raiz
 
-        // API de usuários
-        handler.addServlet(new ServletHolder(new UsuarioServlet()), "/api/usuarios/*");
+        // Adiciona servlet de usuários
+        context.addServlet(UsuarioServlet.class, "/usuario/*");
+
+        // Define o contexto no servidor
+        server.setHandler(context);
 
         // Inicia o servidor
-        server.setHandler(handler);
         server.start();
-        System.out.println("🚀 TOKI rodando em: http://localhost:8080/");
+        System.out.println("Servidor iniciado em http://localhost:8080/login_cadastro/login.html");
         server.join();
     }
 }

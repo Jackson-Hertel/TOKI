@@ -19,14 +19,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>central</id>
-            <name>Maven Central</name>
-            <url>https://repo.maven.apache.org/maven2</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <!-- Jetty Server -->
         <dependency>
@@ -42,7 +34,7 @@
             <version>11.0.18</version>
         </dependency>
 
-        <!-- Jakarta Servlet API (sem scope provided!) -->
+        <!-- Jakarta Servlet API -->
         <dependency>
             <groupId>org.eclipse.jetty.toolchain</groupId>
             <artifactId>jetty-jakarta-servlet-api</artifactId>
@@ -63,6 +55,19 @@
             <version>2.2.224</version>
         </dependency>
 
+        <!-- Mail -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
         <!-- SLF4J Logger -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -73,7 +78,7 @@
 
     <build>
         <plugins>
-            <!-- Plugin para compilar Java -->
+            <!-- Compilador Java -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
@@ -83,7 +88,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven Shade Plugin: cria o jar "uber" -->
+            <!-- Shade Plugin: cria jar "uber" -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>

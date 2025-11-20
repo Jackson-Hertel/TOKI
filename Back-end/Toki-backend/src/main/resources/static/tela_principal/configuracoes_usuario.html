@@ -1,165 +1,212 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOKI | Configurações</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TOKI – Configurações</title>
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind (opcional: mantém utilitários que usamos) -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- CSS Customizado -->
+    <!-- Fonts / Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+    <!-- CSS local -->
     <link rel="stylesheet" href="../css/configuracoes_usuario.css">
 </head>
-<body class="toki-theme bg-gray-100 text-gray-900">
+<body>
 
-<div class="config-container w-full max-w-3xl bg-white shadow-xl rounded-xl p-8 mx-auto my-12">
+<div class="max-w-7xl mx-auto min-h-screen p-4 flex flex-col lg:flex-row gap-6">
 
-    <h1 class="config-title text-3xl font-bold mb-8 text-gray-900 text-center">
-        Configurações do Usuário
-    </h1>
-
-    <!-- ================== PERFIL ================== -->
-    <section id="perfil" class="config-section mb-10">
-
-        <h2 id="nomeUsuario" class="section-title text-xl font-semibold text-gray-800 mb-2">
-            👤 Perfil do Usuário
-        </h2>
-        <p class="section-desc text-gray-600 mb-6">Edite suas informações pessoais e foto de perfil.</p>
-
-        <!-- FOTO DE PERFIL -->
-        <div class="w-full flex justify-center mb-6">
-            <label for="fotoInput" class="cursor-pointer">
-                <img id="fotoPreview"
-                     src="../img/default_profile.png"
-                     class="w-28 h-28 rounded-full shadow-md object-cover border-2 border-blue-400 hover:border-blue-600 transition">
-            </label>
-            <input type="file" id="fotoInput" accept="image/*" hidden>
+    <!-- SIDEBAR -->
+    <aside class="w-full lg:w-64 card p-5 flex flex-col gap-5">
+        <div class="flex items-center gap-3">
+            <img id="fotoPerfil" src="../img/perfil.png" class="w-12 h-12 rounded-full ring-2 object-cover" alt="Foto">
+            <div>
+                <p id="nomeSidebar" class="font-semibold">Usuário TOKI</p>
+                <p id="emailSidebar" class="text-sm opacity-70">email@exemplo.com</p>
+            </div>
         </div>
 
-        <!-- Campos do Perfil -->
-        <div class="space-y-4">
-            <div class="input-group">
-                <label class="block font-medium">Nome</label>
-                <input type="text" id="nome" class="mt-1 w-full border rounded-lg p-2">
-            </div>
-
-            <div class="input-group">
-                <label class="block font-medium">E-mail</label>
-                <input type="email" id="email" class="mt-1 w-full border rounded-lg p-2">
-            </div>
-
-            <div class="input-group">
-                <label class="block font-medium">Senha Atual</label>
-                <input type="password" id="senhaAtual" class="mt-1 w-full border rounded-lg p-2">
-            </div>
-
-            <div class="input-group">
-                <label class="block font-medium">Nova Senha</label>
-                <input type="password" id="novaSenha" class="mt-1 w-full border rounded-lg p-2">
-            </div>
-
-            <div class="input-group">
-                <label class="block font-medium">Confirmar Nova Senha</label>
-                <input type="password" id="confirmarSenha" class="mt-1 w-full border rounded-lg p-2">
-            </div>
-
-            <button id="btnSalvarPerfil"
-                    class="btn-primary bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 w-full">
-                Salvar Perfil
+        <nav class="flex flex-col gap-1" role="tablist" aria-orientation="vertical">
+            <button type="button" data-tab="abaConta" class="tab-btn tab-active" aria-selected="true">
+                <span class="material-symbols-outlined text-base">person</span> Conta
             </button>
-        </div>
-    </section>
 
-    <!-- ================== APARÊNCIA ================== -->
-    <section id="tema" class="config-section mb-10">
-        <h2 class="section-title text-xl font-semibold text-gray-800 mb-2">🎨 Aparência</h2>
-        <p class="section-desc text-gray-600 mb-4">Escolha temas e cores para personalizar seu TOKI.</p>
-
-        <div class="space-y-4">
-            <div class="input-group">
-                <label class="block font-medium">Tema do Sistema</label>
-                <select id="temaSelect" class="border rounded-lg p-2 mt-1 w-full">
-                    <option value="claro">Tema Claro</option>
-                    <option value="escuro">Tema Escuro</option>
-                    <option value="auto">Automático</option>
-                </select>
-            </div>
-
-            <div class="input-group">
-                <label class="block font-medium">Cor Principal</label>
-                <select id="corPrincipal" class="border rounded-lg p-2 mt-1 w-full">
-                    <option value="azul">Azul</option>
-                    <option value="roxo">Roxo</option>
-                    <option value="verde">Verde</option>
-                    <option value="laranja">Laranja</option>
-                </select>
-            </div>
-
-            <button id="btnSalvarAparencia"
-                    class="btn-primary bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 w-full">
-                Salvar Aparência
+            <button type="button" data-tab="abaNotificacoes" class="tab-btn" aria-selected="false">
+                <span class="material-symbols-outlined text-base">notifications</span> Notificações
             </button>
-        </div>
-    </section>
 
-    <!-- ================== CALENDÁRIO ================== -->
-    <section id="calendario" class="config-section mb-10">
-        <h2 class="section-title text-xl font-semibold text-gray-800 mb-2">📆 Preferências do Calendário</h2>
-        <p class="section-desc text-gray-600 mb-4">Controle o que aparece no seu calendário.</p>
-
-        <div class="space-y-4">
-            <div class="input-group">
-                <label class="block font-medium">Início da semana</label>
-                <select id="inicioSemana" class="border rounded-lg p-2 mt-1 w-full">
-                    <option value="domingo">Domingo</option>
-                    <option value="segunda">Segunda</option>
-                </select>
-            </div>
-
-            <div class="option-grid grid grid-cols-2 gap-4">
-                <label><input type="checkbox" id="feriados"> Mostrar feriados</label>
-                <label><input type="checkbox" id="aniversarios"> Mostrar aniversários</label>
-                <label><input type="checkbox" id="concluidos"> Mostrar concluídos</label>
-            </div>
-
-            <button id="btnSalvarCalendario"
-                    class="btn-primary bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 w-full mt-4">
-                Salvar Calendário
+            <button type="button" data-tab="abaAparencia" class="tab-btn" aria-selected="false">
+                <span class="material-symbols-outlined text-base">palette</span> Aparência
             </button>
-        </div>
-    </section>
 
-    <!-- ================== PRIVACIDADE ================== -->
-    <section class="config-section">
-        <h2 class="section-title text-xl font-semibold text-gray-800 mb-2">🔒 Dados e Privacidade</h2>
-        <p class="section-desc text-gray-600 mb-4">Gerencie segurança, exportações e backups.</p>
+            <button type="button" data-tab="abaPrivacidade" class="tab-btn" aria-selected="false">
+                <span class="material-symbols-outlined text-base">lock</span> Privacidade
+            </button>
+        </nav>
 
-        <div class="option-grid grid grid-cols-2 gap-4 mb-6">
-            <button id="baixarDados" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                Baixar Meus Dados
-            </button>
-            <button id="exportarCSV" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                Exportar CSV
-            </button>
-            <button id="backup" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                Backup
-            </button>
-            <button id="excluirEventos" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                Excluir Eventos
-            </button>
-        </div>
-
-        <button id="excluirConta"
-                class="btn-danger bg-red-600 text-white px-5 py-3 rounded-lg hover:bg-red-700 w-full">
-            Excluir Conta
+        <button id="logoutBtn" type="button" class="flex items-center gap-3 text-red-500 px-3 py-2 rounded-lg hover:bg-red-50 cursor-pointer">
+            <span class="material-symbols-outlined">logout</span> Sair
         </button>
-    </section>
+    </aside>
 
+    <!-- ÁREA PRINCIPAL -->
+    <main class="flex-1">
+
+        <!-- CONTA -->
+        <section id="abaConta" class="tab-panel">
+            <h1 class="titulo">Conta</h1>
+
+            <div class="flex items-center gap-4">
+                <img id="fotoUsuario" src="../img/perfil.png" class="w-24 h-24 rounded-full object-cover ring-2 cursor-pointer" alt="Foto usuário">
+                <input id="inputFoto" type="file" class="hidden" accept="image/*">
+                <p class="text-sm opacity-70">Clique na foto para alterar</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <label class="label-input">
+                    Nome de exibição
+                    <input id="nome" type="text" class="input" placeholder="Seu nome">
+                </label>
+
+                <label class="label-input">
+                    E-mail
+                    <input id="email" type="email" class="input" placeholder="email@exemplo.com">
+                </label>
+
+                <label class="label-input">
+                    Telefone (opcional)
+                    <input id="telefone" type="tel" class="input" placeholder="+55 (__) ____-____">
+                </label>
+
+                <label class="label-input">
+                    Idioma
+                    <select id="idioma" class="input">
+                        <option value="pt-BR">Português (Brasil)</option>
+                        <option value="en">Inglês</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" id="cancelarConta" class="btn-sec">Cancelar</button>
+                <button type="button" id="salvarConta" class="btn-primary">Salvar</button>
+            </div>
+        </section>
+
+        <!-- NOTIFICAÇÕES -->
+        <section id="abaNotificacoes" class="tab-panel hidden">
+            <h1 class="titulo">Notificações</h1>
+
+            <div class="card">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-[var(--toki-primary)]">notifications</span>
+                    <p class="font-medium">Receber lembretes</p>
+
+                    <label class="switch ml-auto">
+                        <input type="checkbox" id="notifToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <hr class="my-4 opacity-50">
+
+                <label class="label-input">
+                    Enviar lembretes por
+                    <select id="metodoLembrete" class="input">
+                        <option value="app">Notificação no app</option>
+                        <option value="email">E-mail</option>
+                        <option value="push">Push (navegador)</option>
+                    </select>
+                </label>
+
+                <label class="label-input">
+                    Antecedência padrão
+                    <select id="antecedencia" class="input">
+                        <option>5 minutos</option>
+                        <option>10 minutos</option>
+                        <option>30 minutos</option>
+                        <option>1 hora</option>
+                    </select>
+                </label>
+
+                <div class="mt-4 flex justify-end gap-3">
+                    <button type="button" id="cancelarNot" class="btn-sec">Cancelar</button>
+                    <button type="button" id="salvarNot" class="btn-primary">Salvar</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- APARÊNCIA -->
+        <section id="abaAparencia" class="tab-panel hidden">
+            <h1 class="titulo">Aparência</h1>
+
+            <div class="card">
+                <p class="font-medium mb-3">Tema</p>
+
+                <div class="flex flex-col gap-2">
+                    <label class="flex items-center gap-2">
+                        <input type="radio" name="tema" value="claro" class="radio-tema"> Claro
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="radio" name="tema" value="escuro" class="radio-tema"> Escuro
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="radio" name="tema" value="auto" class="radio-tema"> Automático
+                    </label>
+                </div>
+
+                <hr class="my-4 opacity-50">
+
+                <p class="font-medium mb-3">Cor principal</p>
+
+                <div class="flex gap-3">
+                    <button type="button" class="color-dot bg-blue-600" data-color="#137fec"></button>
+                    <button type="button" class="color-dot bg-purple-600" data-color="#7c3aed"></button>
+                    <button type="button" class="color-dot bg-emerald-600" data-color="#10b981"></button>
+                </div>
+
+                <div class="mt-4 flex justify-end gap-3">
+                    <button type="button" id="cancelarApar" class="btn-sec">Cancelar</button>
+                    <button type="button" id="salvarApar" class="btn-primary">Salvar</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRIVACIDADE -->
+        <section id="abaPrivacidade" class="tab-panel hidden">
+            <h1 class="titulo">Privacidade</h1>
+
+            <div class="card">
+                <p class="font-medium mb-3">Autenticação em duas etapas</p>
+
+                <label class="switch">
+                    <input type="checkbox" id="twoFaToggle">
+                    <span class="slider"></span>
+                </label>
+
+                <hr class="my-4 opacity-50">
+
+                <h3 class="font-medium mb-2">Sessões ativas</h3>
+
+                <ul id="sessaoList" class="space-y-2 text-sm">
+                    <!-- Carregado dinamicamente -->
+                </ul>
+
+                <div class="mt-4 flex justify-end gap-3">
+                    <button type="button" id="cancelarPriv" class="btn-sec">Cancelar</button>
+                    <button type="button" id="salvarPriv" class="btn-primary">Salvar</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
 </div>
 
-<!-- JS Customizado -->
 <script src="../js/configuracoes_usuario.js"></script>
-
 </body>
 </html>

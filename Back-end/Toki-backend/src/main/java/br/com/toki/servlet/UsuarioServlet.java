@@ -3,6 +3,7 @@ package br.com.toki.servlet;
 import br.com.toki.model.Usuario;
 import br.com.toki.service.UsuarioService;
 import com.google.gson.Gson;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -11,10 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/api/usuarios/*")
-@MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1MB
-        maxFileSize = 10 * 1024 * 1024,  // 10MB
-        maxRequestSize = 20 * 1024 * 1024) // 20MB
+@WebServlet("/usuario/*")
+@MultipartConfig
 public class UsuarioServlet extends HttpServlet {
 
     private final UsuarioService service = new UsuarioService();
@@ -37,17 +36,16 @@ public class UsuarioServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         configurarCORS(resp);
         String path = req.getPathInfo();
+        resp.setContentType("application/json");
 
         if (path == null || path.equals("/")) {
             List<Usuario> usuarios = service.listarUsuarios();
-            resp.setContentType("application/json");
             resp.getWriter().write(gson.toJson(usuarios));
             return;
         }
 
         if (path.equals("/logado")) {
             HttpSession session = req.getSession(false);
-            resp.setContentType("application/json");
             if (session != null && session.getAttribute("usuarioLogado") != null) {
                 Usuario logado = (Usuario) session.getAttribute("usuarioLogado");
                 resp.getWriter().write(gson.toJson(logado));
@@ -62,104 +60,195 @@ public class UsuarioServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, jakarta.servlet.ServletException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         configurarCORS(resp);
         String path = req.getPathInfo();
+
         if (path == null) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Endpoint inválido");
             return;
         }
 
-        if (path.equals("/upload")) {
-            // Upload de foto
-            HttpSession session = req.getSession(false);
-            if (session == null || session.getAttribute("usuarioLogado") == null) {
-                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                resp.getWriter().write("{\"erro\":\"Usuário não logado\"}");
-                return;
-            }
-
-            Usuario logado = (Usuario) session.getAttribute("usuarioLogado");
-            Part filePart = req.getPart("fotoPerfil");
-            if (filePart == null || filePart.getSize() == 0) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Nenhum arquivo enviado");
-                return;
-            }
-
-            String nomeArquivo = "usuario" + logado.getId() + "_" + System.currentTimeMillis() + ".jpg";
-            String uploadDir = req.getServletContext().getRealPath("/uploads/perfil/");
-            File dir = new File(uploadDir);
-            if (!dir.exists()) dir.mkdirs();
-
-            String caminhoCompleto = uploadDir + File.separator + nomeArquivo;
-            filePart.write(caminhoCompleto);
-
-            // Atualiza apenas o caminho no banco
-            String caminhoRelativo = "uploads/perfil/" + nomeArquivo;
-            logado.setFotoPerfil(caminhoRelativo);
-            service.atualizarUsuario(logado);
-            session.setAttribute("usuarioLogado", logado);
-
-            resp.setContentType("application/json");
-            resp.getWriter().write("{\"caminho\":\"" + caminhoRelativo + "\"}");
-            return;
-        }
-
-        // Para os demais endpoints (cadastrar, login, atualizar)
-        Usuario usuario = gson.fromJson(req.getReader(), Usuario.class);
-
         switch (path) {
             case "/cadastrar":
-                service.adicionarUsuario(usuario);
-                resp.setStatus(HttpServletResponse.SC_CREATED);
-                resp.getWriter().write("{\"mensagem\":\"Usuário cadastrado com sucesso\"}");
+                cadastrarUsuario(req, resp);
                 break;
 
             case "/login":
-                Usuario existente = service.buscarUsuarioPorEmailESenha(usuario.getEmail(), usuario.getSenha());
-                if (existente != null) {
-                    HttpSession session = req.getSession(true);
-                    session.setAttribute("usuarioLogado", existente);
-                    resp.setStatus(HttpServletResponse.SC_OK);
-                    resp.setContentType("application/json");
-                    resp.getWriter().write(gson.toJson(existente));
-                } else {
-                    resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Credenciais inválidas");
-                }
+                loginUsuario(req, resp);
                 break;
 
             case "/atualizar":
-                HttpSession session = req.getSession(false);
-                if (session == null || session.getAttribute("usuarioLogado") == null) {
-                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    resp.getWriter().write("{\"erro\":\"Usuário não logado\"}");
-                    return;
-                }
+                atualizarUsuario(req, resp);
+                break;
 
-                Usuario logado = (Usuario) session.getAttribute("usuarioLogado");
+            case "/upload":
+                uploadFotoPerfil(req, resp);
+                break;
 
-                // Atualiza campos
-                if (usuario.getNome() != null) logado.setNome(usuario.getNome());
-                if (usuario.getEmail() != null) logado.setEmail(usuario.getEmail());
-                if (usuario.getSenha() != null && !usuario.getSenha().isEmpty()) logado.setSenha(usuario.getSenha());
-                if (usuario.getFotoPerfil() != null) logado.setFotoPerfil(usuario.getFotoPerfil());
-                if (usuario.getTema() != null) logado.setTema(usuario.getTema());
-                if (usuario.getCorPrincipal() != null) logado.setCorPrincipal(usuario.getCorPrincipal());
-                logado.setInicioSemana(usuario.getInicioSemana());
-                logado.setFeriados(usuario.isFeriados());
-                logado.setAniversarios(usuario.isAniversarios());
-                logado.setConcluidos(usuario.isConcluidos());
+            case "/gerarCodigo":
+                gerarCodigo(req, resp);
+                break;
 
-                service.atualizarUsuario(logado);
-                session.setAttribute("usuarioLogado", logado);
-
-                resp.setStatus(HttpServletResponse.SC_OK);
-                resp.setContentType("application/json");
-                resp.getWriter().write(gson.toJson(logado));
+            case "/redefinirSenha":
+                redefinirSenha(req, resp);
                 break;
 
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Caminho não encontrado: " + path);
+        }
+    }
+
+    private void cadastrarUsuario(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String nome = req.getParameter("nome");
+        String email = req.getParameter("email");
+        String senha = req.getParameter("senha");
+
+        if (nome == null || email == null || senha == null ||
+                nome.isEmpty() || email.isEmpty() || senha.isEmpty()) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("Preencha todos os campos.");
+            return;
+        }
+
+        if (service.buscarUsuarioPorEmail(email) != null) {
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
+            resp.getWriter().write("E-mail já cadastrado.");
+            return;
+        }
+
+        Usuario usuario = new Usuario();
+        usuario.setNome(nome);
+        usuario.setEmail(email);
+        usuario.setSenha(senha);
+
+        service.adicionarUsuario(usuario); // chama adicionarUsuarioComHash internamente
+
+        resp.setStatus(HttpServletResponse.SC_CREATED);
+        resp.getWriter().write("{\"mensagem\":\"Usuário cadastrado com sucesso\"}");
+    }
+
+    private void loginUsuario(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String loginEmail = req.getParameter("email");
+        String loginSenha = req.getParameter("senha");
+
+        if (loginEmail == null || loginSenha == null ||
+                loginEmail.isEmpty() || loginSenha.isEmpty()) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("Preencha e-mail e senha.");
+            return;
+        }
+
+        Usuario existente = service.buscarUsuarioPorEmailESenha(loginEmail, loginSenha); // chama login do DAO
+        if (existente != null) {
+            HttpSession session = req.getSession(true);
+            session.setAttribute("usuarioLogado", existente);
+
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType("application/json");
+            resp.getWriter().write(gson.toJson(existente));
+        } else {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.getWriter().write("Credenciais inválidas ou usuário não ativo");
+        }
+    }
+
+    private void atualizarUsuario(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        HttpSession sessionAtualizar = req.getSession(false);
+        if (sessionAtualizar == null || sessionAtualizar.getAttribute("usuarioLogado") == null) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.getWriter().write("{\"erro\":\"Usuário não logado\"}");
+            return;
+        }
+
+        Usuario logadoAtualizar = (Usuario) sessionAtualizar.getAttribute("usuarioLogado");
+        String novoNome = req.getParameter("nome");
+        String novoEmail = req.getParameter("email");
+        String novaSenha = req.getParameter("senha");
+
+        if (novoNome != null) logadoAtualizar.setNome(novoNome);
+        if (novoEmail != null) logadoAtualizar.setEmail(novoEmail);
+        if (novaSenha != null && !novaSenha.isEmpty()) logadoAtualizar.setSenha(novaSenha);
+
+        service.atualizarUsuario(logadoAtualizar);
+        sessionAtualizar.setAttribute("usuarioLogado", logadoAtualizar);
+
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType("application/json");
+        resp.getWriter().write(gson.toJson(logadoAtualizar));
+    }
+
+    private void uploadFotoPerfil(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("usuarioLogado") == null) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.getWriter().write("{\"erro\":\"Usuário não logado\"}");
+            return;
+        }
+
+        Usuario logado = (Usuario) session.getAttribute("usuarioLogado");
+        Part filePart = req.getPart("fotoPerfil");
+        if (filePart == null || filePart.getSize() == 0) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Nenhum arquivo enviado");
+            return;
+        }
+
+        String nomeArquivo = "usuario" + logado.getId() + "_" + System.currentTimeMillis() + ".jpg";
+        String uploadDir = req.getServletContext().getRealPath("/uploads/perfil/");
+        File dir = new File(uploadDir);
+        if (!dir.exists()) dir.mkdirs();
+
+        String caminhoCompleto = uploadDir + File.separator + nomeArquivo;
+        filePart.write(caminhoCompleto);
+
+        String caminhoRelativo = "uploads/perfil/" + nomeArquivo;
+        logado.setFotoPerfil(caminhoRelativo);
+        service.atualizarUsuario(logado);
+        session.setAttribute("usuarioLogado", logado);
+
+        resp.setContentType("application/json");
+        resp.getWriter().write("{\"caminho\":\"" + caminhoRelativo + "\"}");
+    }
+
+    private void gerarCodigo(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String email = req.getParameter("email");
+        if (email == null || email.isEmpty()) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("Informe o e-mail.");
+            return;
+        }
+
+        try {
+            service.gerarCodigoRecuperacao(email); // agora trata a MessagingException dentro do método
+            resp.setContentType("application/json");
+            resp.getWriter().write("{\"mensagem\":\"Código de recuperação enviado para o e-mail\"}");
+        } catch (jakarta.mail.MessagingException e) {
+            e.printStackTrace();
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().write("{\"erro\":\"Não foi possível enviar o código por e-mail\"}");
+        }
+    }
+
+
+    private void redefinirSenha(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String email = req.getParameter("email");
+        String codigo = req.getParameter("codigo");
+        String novaSenha = req.getParameter("senha");
+
+        if (email == null || codigo == null || novaSenha == null ||
+                email.isEmpty() || codigo.isEmpty() || novaSenha.isEmpty()) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("Preencha todos os campos.");
+            return;
+        }
+
+        boolean sucesso = service.redefinirSenha(email, codigo, novaSenha);
+        if (sucesso) {
+            resp.setContentType("application/json");
+            resp.getWriter().write("{\"mensagem\":\"Senha redefinida com sucesso!\"}");
+        } else {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("{\"erro\":\"Código inválido ou expirado\"}");
         }
     }
 
@@ -170,9 +259,8 @@ public class UsuarioServlet extends HttpServlet {
 
         if ("/logout".equals(path)) {
             HttpSession session = req.getSession(false);
-            if (session != null) {
-                session.invalidate();
-            }
+            if (session != null) session.invalidate();
+
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.getWriter().write("{\"mensagem\":\"Logout realizado com sucesso\"}");
         } else {

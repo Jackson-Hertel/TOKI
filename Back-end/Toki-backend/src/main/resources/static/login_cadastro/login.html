@@ -1,49 +1,54 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>TOKI | Login</title>
+
+    <!-- CSS principal -->
     <link rel="stylesheet" href="../css/tela_lcr.css">
-    <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <link rel="icon" href="../img/favicon.ico" />
 </head>
 <body>
 
 <div class="auth-container">
-
     <div class="logo-area">
-        <img src="../img/favicon.ico" alt="Logo TOKI">
+        <img src="../img/favicon.ico" alt="TOKI logo">
     </div>
 
     <h2>Entrar</h2>
     <p class="subtitle">Acesse sua conta no TOKI</p>
 
-    <form id="formLogin" class="formulario">
-
+    <form id="formLogin" class="formulario" novalidate>
         <div class="input-group">
             <span class="icon">📧</span>
-            <input type="email" id="email" placeholder="E-mail" required>
+            <input type="email" id="loginEmail" name="email" placeholder="E-mail" required autocomplete="username">
         </div>
 
         <div class="input-group">
             <span class="icon">🔒</span>
-            <input type="password" id="senha" placeholder="Senha" required>
-
-            <!-- ÍCONE DO OLHO (PRECISA SER IMG) -->
-            <img src="../img/eye-closed.png"
-                 class="toggle-password"
-                 data-target="senha"
-                 id="toggleSenha">
+            <input type="password" id="loginSenha" name="senha" placeholder="Senha" required autocomplete="current-password">
+            <span class="material-symbols-outlined toggle-password"
+                  data-target="loginSenha" title="Mostrar / ocultar senha">
+              visibility_off
+            </span>
         </div>
 
         <button type="submit" class="btn-primary">Entrar</button>
+
+        <!-- Mensagem de feedback -->
+        <div id="mensagemLogin" class="mensagem-feedback"></div>
     </form>
 
     <p class="alt"><a href="/login_cadastro/recuperar.html">Esqueceu sua senha?</a></p>
     <p class="alt"><a href="/login_cadastro/cadastro.html">Criar nova conta</a></p>
-
 </div>
 
+<!-- JS separado -->
 <script src="../js/toki_auth.js"></script>
 </body>
 </html>

@@ -6,8 +6,6 @@ public class Usuario {
     private String email;
     private String senha;
     private String fotoPerfil;
-
-    // NOVOS CAMPOS
     private String tema;          // ex: "claro" ou "escuro"
     private String corPrincipal;  // ex: "azul", "verde", etc.
     private String inicioSemana;  // ex: "domingo", "segunda"
@@ -15,15 +13,19 @@ public class Usuario {
     private boolean aniversarios;
     private boolean concluidos;
 
+    // NOVOS campos
+    private boolean ativo = false;
+    private boolean verificado = false;
+
     // ============================
     // Construtores
     // ============================
-    public Usuario() {
-    }
+    public Usuario() {}
 
     public Usuario(int id, String nome, String email, String senha, String fotoPerfil,
                    String tema, String corPrincipal, String inicioSemana,
-                   boolean feriados, boolean aniversarios, boolean concluidos) {
+                   boolean feriados, boolean aniversarios, boolean concluidos,
+                   boolean ativo, boolean verificado) {
         this.id = id;
         this.nome = nome;
         this.email = email;
@@ -35,6 +37,8 @@ public class Usuario {
         this.feriados = feriados;
         this.aniversarios = aniversarios;
         this.concluidos = concluidos;
+        this.ativo = ativo;
+        this.verificado = verificado;
     }
 
     public Usuario(int id, String nome, String email, String senha) {
@@ -80,4 +84,10 @@ public class Usuario {
 
     public boolean isConcluidos() { return concluidos; }
     public void setConcluidos(boolean concluidos) { this.concluidos = concluidos; }
+
+    public boolean isAtivo() { return ativo; }
+    public void setAtivo(boolean ativo) { this.ativo = ativo; }
+
+    public boolean isVerificado() { return verificado; }
+    public void setVerificado(boolean verificado) { this.verificado = verificado; }
 }
