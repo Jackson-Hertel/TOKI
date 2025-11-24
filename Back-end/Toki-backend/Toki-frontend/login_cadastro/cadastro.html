@@ -5,21 +5,20 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>TOKI | Cadastro</title>
 
-    <link rel="stylesheet" href="../css/tela_lcr.css">
+    <link rel="stylesheet" href="/css/tela_lcr.css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <link rel="icon" href="../img/favicon.ico" />
+    <link rel="icon" href="/img/favicon.ico" />
 </head>
 <body>
-
 <div class="auth-container">
     <div class="logo-area">
-        <img src="../img/favicon.ico" alt="TOKI logo">
+        <img src="/img/favicon.ico" alt="TOKI logo">
     </div>
 
     <h2>Criar Conta</h2>
     <p class="subtitle">Organize sua rotina com o TOKI</p>
 
-    <form id="formCadastro" class="formulario" novalidate>
+    <form id="formCadastro" class="formulario" novalidate action="/usuario/cadastrar" method="POST">
         <div class="input-group">
             <span class="icon">👤</span>
             <input type="text" id="cadNome" name="nome" placeholder="Seu nome" required autocomplete="name">
@@ -41,9 +40,9 @@
         <button type="submit" class="btn-primary">Cadastrar</button>
     </form>
 
-    <p class="alt"><a href="login.html">Já tenho conta</a></p>
+    <p class="alt"><a href="/login_cadastro/login.html">Já tenho conta</a></p>
 </div>
-
-<script src="../js/toki_auth.js"></script>
+<script src="/js/api_config.js"></script>
+<script src="/js/toki_auth.js"></script>
 </body>
 </html>

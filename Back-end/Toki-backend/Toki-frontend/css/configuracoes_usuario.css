@@ -11,6 +11,12 @@
   --muted-dark: #93b3d8;
 }
 
+.show {
+    display: flex !important;
+    opacity: 1;
+    pointer-events: auto;
+}
+
 /* Aplica modo dark quando <html data-theme="dark"> */
 html[data-theme="dark"] {
   background: var(--bg-dark);

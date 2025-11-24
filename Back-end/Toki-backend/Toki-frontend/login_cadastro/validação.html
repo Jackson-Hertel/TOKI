@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOKI | Cadastro e Verificação</title>
+    <link rel="stylesheet" href="/css/tela_lcr.css">
+</head>
+<body>
+<h2>Cadastro TOKI</h2>
+
+<form id="formCadastro" method="post" action="/usuario/cadastro">
+    <input type="text" name="nome" placeholder="Nome" required>
+    <input type="email" name="email" placeholder="Gmail" required>
+    <input type="password" name="senha" placeholder="Senha" required>
+    <button type="submit">Enviar código</button>
+</form>
+
+<h2>Validar Código</h2>
+<form id="formValidar" method="post" action="/usuario/validar">
+    <input type="email" name="email" placeholder="Gmail" required>
+    <input type="text" name="codigo" placeholder="Código" required>
+    <button type="submit">Validar</button>
+</form>
+
+<div id="mensagem"></div>
+<script src="/js/api_config.js"></script>
+<script src="/js/toki_auth.js"></script>
+</body>
+</html>

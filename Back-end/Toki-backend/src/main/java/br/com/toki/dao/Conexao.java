@@ -6,16 +6,22 @@ import java.sql.SQLException;
 
 public class Conexao {
 
-    private static final String URL = "jdbc:h2:~/tokiDB;DB_CLOSE_DELAY=-1"; // caminho do banco
-    private static final String USER = "sa"; // usuário padrão do H2
-    private static final String PASSWORD = ""; // senha padrão (vazia)
+    private static final String URL =
+            "jdbc:h2:tcp://localhost/C:/Projeto_TOKI/Back-end/Toki-backend/database/toki_db;" +
+                    "AUTO_SERVER=TRUE;" +
+                    "DB_CLOSE_DELAY=-1;" +
+                    "IFEXISTS=FALSE;" +
+                    "MODE=MySQL;" +
+                    "DATABASE_TO_UPPER=false";
+
+    private static final String USER = "sa";
+    private static final String PASS = "";
 
     public Connection getConnection() {
         try {
-            return DriverManager.getConnection(URL, USER, PASSWORD);
+            return DriverManager.getConnection(URL, USER, PASS);
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Erro ao conectar com o banco de dados H2");
+            throw new RuntimeException("Erro ao conectar ao banco H2", e);
         }
     }
 }

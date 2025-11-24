@@ -8,11 +8,11 @@ public class Evento {
     private String titulo;
     private String descricao;
     private LocalDate data;
-    private LocalTime hora;          // Adicionado para hora do evento
-    private int prioridade;          // 1=Normal, 2=Alta, 3=Urgente
-    private String repeticao;        // "diario", "semanal", "mensal" ou null
-    private boolean lembreteEnviado; // Controle de envio
-    private String cor;              // "blue", "purple", "green", etc.
+    private LocalTime hora;          // Correto: LocalTime
+    private String prioridade;          // 1=Normal, 2=Alta, 3=Urgente
+    private String repeticao;        // "diario", "semanal", "mensal"
+    private boolean lembreteEnviado;
+    private String cor;              // Ex: "blue", "red", etc.
 
     // Getters e Setters
     public int getId() { return id; }
@@ -30,8 +30,8 @@ public class Evento {
     public LocalTime getHora() { return hora; }
     public void setHora(LocalTime hora) { this.hora = hora; }
 
-    public int getPrioridade() { return prioridade; }
-    public void setPrioridade(int prioridade) { this.prioridade = prioridade; }
+    public String getPrioridade() { return prioridade; }
+    public void setPrioridade(String prioridade) { this.prioridade = prioridade; }
 
     public String getRepeticao() { return repeticao; }
     public void setRepeticao(String repeticao) { this.repeticao = repeticao; }

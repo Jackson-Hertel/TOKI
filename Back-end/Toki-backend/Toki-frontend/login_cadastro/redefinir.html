@@ -5,36 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOKI | Redefinir Senha</title>
 
-    <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
-    <link rel="stylesheet" href="../css/tela_lcr.css">
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/tela_lcr.css">
 </head>
 <body>
-
 <div class="auth-container">
-
     <div class="logo-area">
-        <img src="../img/favicon.ico" alt="Logo TOKI">
+        <img src="/img/favicon.ico" alt="Logo TOKI">
     </div>
 
     <h2>Redefinir Senha</h2>
     <p class="subtitle">Insira o código recebido e a nova senha.</p>
 
-    <form id="formRedefinir" class="formulario">
+    <form id="formRedefinir" class="formulario" action="/redefinir/senha" method="POST">
+        <input type="hidden" name="email">
         <div class="input-group">
             <span class="icon">🔑</span>
-            <input type="text" id="codigo" placeholder="Código recebido" required>
+            <input type="text" id="codigo" name="codigo" placeholder="Código recebido" required>
         </div>
         <div class="input-group">
             <span class="icon">🔒</span>
-            <input type="password" id="novaSenha" placeholder="Nova senha" required>
+            <input type="password" id="novaSenha" name="senha" placeholder="Nova senha" required>
         </div>
         <button type="submit" class="btn-primary">Redefinir Senha</button>
     </form>
 
-    <p class="alt"><a href="login.html">Voltar ao login</a></p>
-
+    <p class="alt"><a href="/login_cadastro/login.html">Voltar ao login</a></p>
 </div>
-
-<script src="../js/toki_auth.js"></script>
+<script src="/js/api_config.js"></script>
+<script src="/js/toki_auth.js"></script>
 </body>
 </html>

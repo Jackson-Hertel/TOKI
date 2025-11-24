@@ -5,14 +5,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>TOKI – Configurações</title>
 
-    <!-- Tailwind (opcional: mantém utilitários que usamos) -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Fonts / Icons -->
+    <link rel="icon" type="image/png" href="../img/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 
-    <!-- CSS local -->
     <link rel="stylesheet" href="../css/configuracoes_usuario.css">
 </head>
 <body>
@@ -33,15 +30,12 @@
             <button type="button" data-tab="abaConta" class="tab-btn tab-active" aria-selected="true">
                 <span class="material-symbols-outlined text-base">person</span> Conta
             </button>
-
             <button type="button" data-tab="abaNotificacoes" class="tab-btn" aria-selected="false">
                 <span class="material-symbols-outlined text-base">notifications</span> Notificações
             </button>
-
             <button type="button" data-tab="abaAparencia" class="tab-btn" aria-selected="false">
                 <span class="material-symbols-outlined text-base">palette</span> Aparência
             </button>
-
             <button type="button" data-tab="abaPrivacidade" class="tab-btn" aria-selected="false">
                 <span class="material-symbols-outlined text-base">lock</span> Privacidade
             </button>
@@ -58,29 +52,24 @@
         <!-- CONTA -->
         <section id="abaConta" class="tab-panel">
             <h1 class="titulo">Conta</h1>
-
             <div class="flex items-center gap-4">
                 <img id="fotoUsuario" src="../img/perfil.png" class="w-24 h-24 rounded-full object-cover ring-2 cursor-pointer" alt="Foto usuário">
                 <input id="inputFoto" type="file" class="hidden" accept="image/*">
                 <p class="text-sm opacity-70">Clique na foto para alterar</p>
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                 <label class="label-input">
                     Nome de exibição
                     <input id="nome" type="text" class="input" placeholder="Seu nome">
                 </label>
-
                 <label class="label-input">
                     E-mail
                     <input id="email" type="email" class="input" placeholder="email@exemplo.com">
                 </label>
-
                 <label class="label-input">
                     Telefone (opcional)
                     <input id="telefone" type="tel" class="input" placeholder="+55 (__) ____-____">
                 </label>
-
                 <label class="label-input">
                     Idioma
                     <select id="idioma" class="input">
@@ -89,7 +78,6 @@
                     </select>
                 </label>
             </div>
-
             <div class="mt-6 flex justify-end gap-3">
                 <button type="button" id="cancelarConta" class="btn-sec">Cancelar</button>
                 <button type="button" id="salvarConta" class="btn-primary">Salvar</button>
@@ -99,20 +87,16 @@
         <!-- NOTIFICAÇÕES -->
         <section id="abaNotificacoes" class="tab-panel hidden">
             <h1 class="titulo">Notificações</h1>
-
             <div class="card">
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-[var(--toki-primary)]">notifications</span>
                     <p class="font-medium">Receber lembretes</p>
-
                     <label class="switch ml-auto">
                         <input type="checkbox" id="notifToggle">
                         <span class="slider"></span>
                     </label>
                 </div>
-
                 <hr class="my-4 opacity-50">
-
                 <label class="label-input">
                     Enviar lembretes por
                     <select id="metodoLembrete" class="input">
@@ -121,7 +105,6 @@
                         <option value="push">Push (navegador)</option>
                     </select>
                 </label>
-
                 <label class="label-input">
                     Antecedência padrão
                     <select id="antecedencia" class="input">
@@ -131,7 +114,6 @@
                         <option>1 hora</option>
                     </select>
                 </label>
-
                 <div class="mt-4 flex justify-end gap-3">
                     <button type="button" id="cancelarNot" class="btn-sec">Cancelar</button>
                     <button type="button" id="salvarNot" class="btn-primary">Salvar</button>
@@ -142,34 +124,26 @@
         <!-- APARÊNCIA -->
         <section id="abaAparencia" class="tab-panel hidden">
             <h1 class="titulo">Aparência</h1>
-
             <div class="card">
                 <p class="font-medium mb-3">Tema</p>
-
                 <div class="flex flex-col gap-2">
                     <label class="flex items-center gap-2">
                         <input type="radio" name="tema" value="claro" class="radio-tema"> Claro
                     </label>
-
                     <label class="flex items-center gap-2">
                         <input type="radio" name="tema" value="escuro" class="radio-tema"> Escuro
                     </label>
-
                     <label class="flex items-center gap-2">
                         <input type="radio" name="tema" value="auto" class="radio-tema"> Automático
                     </label>
                 </div>
-
                 <hr class="my-4 opacity-50">
-
                 <p class="font-medium mb-3">Cor principal</p>
-
                 <div class="flex gap-3">
                     <button type="button" class="color-dot bg-blue-600" data-color="#137fec"></button>
                     <button type="button" class="color-dot bg-purple-600" data-color="#7c3aed"></button>
                     <button type="button" class="color-dot bg-emerald-600" data-color="#10b981"></button>
                 </div>
-
                 <div class="mt-4 flex justify-end gap-3">
                     <button type="button" id="cancelarApar" class="btn-sec">Cancelar</button>
                     <button type="button" id="salvarApar" class="btn-primary">Salvar</button>
@@ -180,23 +154,15 @@
         <!-- PRIVACIDADE -->
         <section id="abaPrivacidade" class="tab-panel hidden">
             <h1 class="titulo">Privacidade</h1>
-
             <div class="card">
                 <p class="font-medium mb-3">Autenticação em duas etapas</p>
-
                 <label class="switch">
                     <input type="checkbox" id="twoFaToggle">
                     <span class="slider"></span>
                 </label>
-
                 <hr class="my-4 opacity-50">
-
                 <h3 class="font-medium mb-2">Sessões ativas</h3>
-
-                <ul id="sessaoList" class="space-y-2 text-sm">
-                    <!-- Carregado dinamicamente -->
-                </ul>
-
+                <ul id="sessaoList" class="space-y-2 text-sm"></ul>
                 <div class="mt-4 flex justify-end gap-3">
                     <button type="button" id="cancelarPriv" class="btn-sec">Cancelar</button>
                     <button type="button" id="salvarPriv" class="btn-primary">Salvar</button>
@@ -206,7 +172,7 @@
 
     </main>
 </div>
-
+<script src="../js/api_config.js"></script>
 <script src="../js/configuracoes_usuario.js"></script>
 </body>
 </html>

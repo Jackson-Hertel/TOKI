@@ -13,7 +13,7 @@ import java.io.IOException;
 @WebServlet("/usuario/login")
 public class LoginServlet extends HttpServlet {
 
-    private final UsuarioService usuarioService = new UsuarioService(); // usar Service
+    private final UsuarioService usuarioService = new UsuarioService();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -22,16 +22,18 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String senha = request.getParameter("senha");
 
-        // chama o método correto do UsuarioService
         Usuario usuario = usuarioService.buscarUsuarioPorEmailESenha(email, senha);
 
         if (usuario != null) {
-            request.getSession().setAttribute("usuarioLogado", usuario);
+
+            // 🔥 AQUI É A CORREÇÃO:
+            request.getSession().setAttribute("usuario", usuario);
+
             response.setStatus(200);
             response.getWriter().write("✔ Login realizado!");
         } else {
             response.setStatus(401);
-            response.getWriter().write("E-mail ou senha incorretos ou conta não ativada.");
+            response.getWriter().write("E-mail ou senha incorretos.");
         }
     }
 }

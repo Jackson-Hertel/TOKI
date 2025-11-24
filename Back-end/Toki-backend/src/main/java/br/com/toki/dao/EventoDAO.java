@@ -7,113 +7,220 @@ import java.util.List;
 
 public class EventoDAO {
 
-    private Connection connection;
-
     public EventoDAO() {
-        this.connection = new Conexao().getConnection();
+        criarTabelaSeNaoExistir();
     }
 
-    // Adiciona um evento com todos os campos
-    public void adicionarEvento(Evento evento) {
-        String sql = "INSERT INTO eventos (titulo, descricao, data, prioridade, repeticao, lembreteEnviado) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, evento.getTitulo());
-            stmt.setString(2, evento.getDescricao());
-            stmt.setDate(3, Date.valueOf(evento.getData()));
-            stmt.setInt(4, evento.getPrioridade());
-            stmt.setString(5, evento.getRepeticao());
-            stmt.setBoolean(6, evento.isLembreteEnviado());
-            stmt.executeUpdate();
+    private Connection getConn() throws SQLException {
+        return new Conexao().getConnection();
+    }
+
+    private void criarTabelaSeNaoExistir() {
+        String sql = """
+        CREATE TABLE IF NOT EXISTS eventos (
+            ID INT AUTO_INCREMENT PRIMARY KEY,
+            TITULO VARCHAR(255) NOT NULL,
+            DESCRICAO VARCHAR(255) NOT NULL,
+            DATA DATE NOT NULL,
+            HORA TIME,
+            COR VARCHAR(20),
+            PRIORIDADE VARCHAR(10) NOT NULL,
+            REPETICAO VARCHAR(50),
+            LEMBRETE_ENVIADO BOOLEAN DEFAULT FALSE,
+            USUARIO_ID INT NOT NULL
+        )
+        """;
+
+        try (Connection c = getConn();
+             Statement st = c.createStatement()) {
+            st.execute(sql);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // Lista todos os eventos
-    public List<Evento> listarTodos() {
-        List<Evento> eventos = new ArrayList<>();
-        String sql = "SELECT * FROM eventos";
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+    public void adicionarEvento(Evento e, int usuarioId) {
+        String sql = """
+        INSERT INTO eventos
+        (TITULO, DESCRICAO, DATA, HORA, COR, PRIORIDADE, REPETICAO, LEMBRETE_ENVIADO, USUARIO_ID)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """;
 
-            while (rs.next()) {
-                Evento e = new Evento();
-                e.setId(rs.getInt("id"));
-                e.setTitulo(rs.getString("titulo"));
-                e.setDescricao(rs.getString("descricao"));
-                e.setData(rs.getDate("data").toLocalDate());
-                e.setPrioridade(rs.getInt("prioridade"));
-                e.setRepeticao(rs.getString("repeticao"));
-                e.setLembreteEnviado(rs.getBoolean("lembreteEnviado"));
-                eventos.add(e);
-            }
+        try (Connection c = getConn();
+             PreparedStatement stmt = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return eventos;
-    }
-
-    // Lista eventos por data
-    public List<Evento> listarPorData(String data) {
-        List<Evento> eventos = new ArrayList<>();
-        String sql = "SELECT * FROM eventos WHERE data = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setDate(1, Date.valueOf(data));
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Evento e = new Evento();
-                e.setId(rs.getInt("id"));
-                e.setTitulo(rs.getString("titulo"));
-                e.setDescricao(rs.getString("descricao"));
-                e.setData(rs.getDate("data").toLocalDate());
-                e.setPrioridade(rs.getInt("prioridade"));
-                e.setRepeticao(rs.getString("repeticao"));
-                e.setLembreteEnviado(rs.getBoolean("lembreteEnviado"));
-                eventos.add(e);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return eventos;
-    }
-
-    // Atualiza campo lembreteEnviado
-    public void atualizarLembreteEnviado(Evento evento) {
-        String sql = "UPDATE eventos SET lembreteEnviado = ? WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setBoolean(1, evento.isLembreteEnviado());
-            stmt.setInt(2, evento.getId());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    // Atualiza evento completo
-    public void atualizarEvento(Evento e) {
-        String sql = "UPDATE eventos SET titulo=?, descricao=?, data=?, prioridade=?, repeticao=? WHERE id=?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, e.getTitulo());
             stmt.setString(2, e.getDescricao());
             stmt.setDate(3, Date.valueOf(e.getData()));
-            stmt.setInt(4, e.getPrioridade());
-            stmt.setString(5, e.getRepeticao());
-            stmt.setInt(6, e.getId());
+            stmt.setTime(4, e.getHora() != null ? Time.valueOf(e.getHora()) : null);
+            stmt.setString(5, e.getCor());
+            stmt.setString(6, e.getPrioridade());
+            stmt.setString(7, e.getRepeticao());
+            stmt.setBoolean(8, e.isLembreteEnviado());
+            stmt.setInt(9, usuarioId);
+
             stmt.executeUpdate();
+
+            // Atualiza o ID do objeto com o ID gerado pelo banco
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if(rs.next()) e.setId(rs.getInt(1));
+            }
+
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
     }
 
-    // Deleta evento
+    public void atualizarLembreteEnviado(Evento e) {
+        String sql = "UPDATE eventos SET LEMBRETE_ENVIADO = ? WHERE ID = ?";
+
+        try (Connection c = getConn();
+             PreparedStatement stmt = c.prepareStatement(sql)) {
+
+            stmt.setBoolean(1, e.isLembreteEnviado());
+            stmt.setInt(2, e.getId());
+            stmt.executeUpdate();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException("Erro ao atualizar lembrete enviado", ex);
+        }
+    }
+
+    public List<Evento> listarPorUsuario(int usuarioId) {
+        List<Evento> lista = new ArrayList<>();
+        String sql = "SELECT * FROM eventos WHERE USUARIO_ID = ?";
+
+        try (Connection c = getConn();
+             PreparedStatement stmt = c.prepareStatement(sql)) {
+
+            stmt.setInt(1, usuarioId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) lista.add(map(rs));
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return lista;
+    }
+
+    public void atualizarEvento(Evento e) {
+        String sql = """
+            UPDATE eventos SET
+            TITULO=?, DESCRICAO=?, DATA=?, HORA=?, COR=?, PRIORIDADE=?, REPETICAO=?
+            WHERE ID=?
+        """;
+
+        try (Connection c = getConn();
+             PreparedStatement stmt = c.prepareStatement(sql)) {
+
+            stmt.setString(1, e.getTitulo());
+            stmt.setString(2, e.getDescricao());
+            stmt.setDate(3, Date.valueOf(e.getData()));
+            stmt.setTime(4, e.getHora() != null ? Time.valueOf(e.getHora()) : null);
+            stmt.setString(5, e.getCor());
+            stmt.setString(6, e.getPrioridade());
+            stmt.setString(7, e.getRepeticao());
+            stmt.setInt(8, e.getId());
+
+            stmt.executeUpdate();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public void deletarEvento(int id) {
-        String sql = "DELETE FROM eventos WHERE id=?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        String sql = "DELETE FROM eventos WHERE ID=?";
+
+        try (Connection c = getConn();
+             PreparedStatement stmt = c.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
             stmt.executeUpdate();
+
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
     }
 
+    public List<Evento> listarPorData(String data) {
+        List<Evento> lista = new ArrayList<>();
+        String sql = "SELECT * FROM eventos WHERE DATA = ? ORDER BY HORA ASC";
+
+        try (Connection c = getConn();
+             PreparedStatement stmt = c.prepareStatement(sql)) {
+
+            stmt.setDate(1, Date.valueOf(data));
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) lista.add(map(rs));
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return lista;
+    }
+
+    public List<Evento> listarTodos() {
+        List<Evento> lista = new ArrayList<>();
+        String sql = "SELECT * FROM eventos ORDER BY DATA ASC, HORA ASC";
+
+        try (Connection c = getConn();
+             Statement st = c.createStatement()) {
+
+            ResultSet rs = st.executeQuery(sql);
+            while (rs.next()) lista.add(map(rs));
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return lista;
+    }
+
+    public List<Evento> listarPorDataEUsuario(String data, int usuarioId) {
+        List<Evento> lista = new ArrayList<>();
+        String sql = """
+            SELECT * FROM eventos
+            WHERE DATA = ? AND USUARIO_ID = ?
+            ORDER BY HORA ASC
+        """;
+
+        try (Connection c = getConn();
+             PreparedStatement stmt = c.prepareStatement(sql)) {
+
+            stmt.setDate(1, Date.valueOf(data));
+            stmt.setInt(2, usuarioId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) lista.add(map(rs));
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return lista;
+    }
+
+    private Evento map(ResultSet rs) throws SQLException {
+        Evento e = new Evento();
+        e.setId(rs.getInt("ID"));
+        e.setTitulo(rs.getString("TITULO"));
+        e.setDescricao(rs.getString("DESCRICAO"));
+        e.setData(rs.getDate("DATA").toLocalDate());
+
+        Time t = rs.getTime("HORA");
+        e.setHora(t != null ? t.toLocalTime() : null);
+
+        e.setCor(rs.getString("COR"));
+        e.setPrioridade(rs.getString("PRIORIDADE"));
+        e.setRepeticao(rs.getString("REPETICAO"));
+        e.setLembreteEnviado(rs.getBoolean("LEMBRETE_ENVIADO"));
+
+        return e;
+    }
 }

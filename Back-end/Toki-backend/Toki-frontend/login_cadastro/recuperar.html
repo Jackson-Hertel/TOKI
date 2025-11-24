@@ -5,32 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOKI | Recuperar Senha</title>
 
-    <link rel="icon" type="image/x-icon" href="../img/icone.ico">
-    <link rel="stylesheet" href="../css/tela_lcr.css">
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/tela_lcr.css">
 </head>
 <body>
-
 <div class="auth-container">
-
     <div class="logo-area">
-        <img src="../img/favicon.ico" alt="Logo TOKI">
+        <img src="/img/favicon.ico" alt="Logo TOKI">
     </div>
 
     <h2>Recuperar Senha</h2>
     <p class="subtitle">Digite seu e-mail para receber o código de recuperação.</p>
 
-    <form id="formRecuperar" class="formulario">
+    <form id="formRecuperar" class="formulario" action="/codigo/enviar" method="POST">
         <div class="input-group">
             <span class="icon">📧</span>
-            <input type="email" id="emailRecuperar" placeholder="E-mail cadastrado" required>
+            <input type="email" id="emailRecuperar" name="email" placeholder="E-mail cadastrado" required>
         </div>
         <button type="submit" class="btn-primary">Enviar Código</button>
     </form>
 
-    <p class="alt"><a href="login.html">Voltar ao login</a></p>
-
+    <p class="alt"><a href="/login_cadastro/login.html">Voltar ao login</a></p>
 </div>
-
-<script src="../js/toki_auth.js"></script>
+<script src="/js/api_config.js"></script>
+<script src="/js/toki_auth.js"></script>
 </body>
 </html>

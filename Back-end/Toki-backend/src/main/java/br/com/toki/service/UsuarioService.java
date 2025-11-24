@@ -19,8 +19,9 @@ public class UsuarioService {
         dao.criarTabela();
     }
 
-    public void adicionarUsuario(Usuario u) {
-        dao.adicionarUsuarioComHash(u);
+    public void adicionarUsuario(Usuario usuario) {
+        // Adiciona usuário com senha já hasheada internamente no DAO
+        dao.adicionarUsuarioComHash(usuario);
     }
 
     public List<Usuario> listarUsuarios() {
@@ -32,12 +33,13 @@ public class UsuarioService {
     }
 
     public Usuario buscarUsuarioPorEmailESenha(String email, String senha) {
-        return dao.loginUsuario(email, senha); // método que retorna Usuario ou null
+        // Retorna null se login inválido
+        return dao.loginUsuario(email, senha);
     }
 
-    public Usuario atualizarUsuario(Usuario u) {
-        dao.atualizarUsuario(u);
-        return u;
+    public Usuario atualizarUsuario(Usuario usuario) {
+        dao.atualizarUsuario(usuario);
+        return usuario;
     }
 
     // ===========================
@@ -45,16 +47,23 @@ public class UsuarioService {
     // ===========================
 
     public void gerarCodigoRecuperacao(String email) throws MessagingException {
-        String codigo = String.valueOf((int)(Math.random() * 899999 + 100000));
+        // Gera código de 6 dígitos
+        String codigo = String.valueOf((int) (Math.random() * 899999 + 100000));
         dao.salvarCodigo(email, codigo);
         emailService.enviarCodigo(email, codigo);
     }
 
     public boolean redefinirSenha(String email, String codigo, String novaSenha) {
+        // Retorna true se a senha foi alterada corretamente
         return dao.redefinirSenha(email, codigo, novaSenha);
     }
 
     public void ativarUsuario(String email) {
         dao.ativarUsuario(email);
+    }
+
+    public boolean validarCodigo(String email, String codigo) {
+        // Apenas valida, não altera nada
+        return dao.validarCodigo(email, codigo);
     }
 }

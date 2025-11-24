@@ -5,16 +5,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>TOKI | Login</title>
 
-    <!-- CSS principal -->
     <link rel="stylesheet" href="../css/tela_lcr.css">
-
-    <!-- Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-
     <link rel="icon" href="../img/favicon.ico" />
 </head>
 <body>
-
 <div class="auth-container">
     <div class="logo-area">
         <img src="../img/favicon.ico" alt="TOKI logo">
@@ -23,7 +18,7 @@
     <h2>Entrar</h2>
     <p class="subtitle">Acesse sua conta no TOKI</p>
 
-    <form id="formLogin" class="formulario" novalidate>
+    <form id="formLogin" class="formulario" novalidate action="/usuario/login" method="POST">
         <div class="input-group">
             <span class="icon">📧</span>
             <input type="email" id="loginEmail" name="email" placeholder="E-mail" required autocomplete="username">
@@ -39,16 +34,13 @@
         </div>
 
         <button type="submit" class="btn-primary">Entrar</button>
-
-        <!-- Mensagem de feedback -->
         <div id="mensagemLogin" class="mensagem-feedback"></div>
     </form>
 
     <p class="alt"><a href="/login_cadastro/recuperar.html">Esqueceu sua senha?</a></p>
     <p class="alt"><a href="/login_cadastro/cadastro.html">Criar nova conta</a></p>
 </div>
-
-<!-- JS separado -->
-<script src="../js/toki_auth.js"></script>
+<script src="/js/api_config.js"></script>
+<script src="/js/toki_auth.js"></script>
 </body>
 </html>

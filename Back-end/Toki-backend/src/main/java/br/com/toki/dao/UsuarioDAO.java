@@ -40,23 +40,25 @@ public class UsuarioDAO {
     }
 
     public void criarTabela() {
-        String sql = "CREATE TABLE IF NOT EXISTS usuario (" +
-                "id INT AUTO_INCREMENT PRIMARY KEY," +
-                "nome VARCHAR(255)," +
-                "email VARCHAR(255) UNIQUE," +
-                "senha VARCHAR(255)," +
-                "fotoPerfil VARCHAR(1000)," +
-                "tema VARCHAR(20) DEFAULT 'claro'," +
-                "corPrincipal VARCHAR(20) DEFAULT 'azul'," +
-                "inicioSemana VARCHAR(20) DEFAULT 'domingo'," +
-                "feriados BOOLEAN DEFAULT FALSE," +
-                "aniversarios BOOLEAN DEFAULT FALSE," +
-                "concluidos BOOLEAN DEFAULT FALSE," +
-                "verificado BOOLEAN DEFAULT FALSE," +
-                "ativo BOOLEAN DEFAULT FALSE," +
-                "codigo_verificacao VARCHAR(10)," +
-                "expiracao_codigo TIMESTAMP" +
-                ")";
+        String sql = """
+            CREATE TABLE IF NOT EXISTS USUARIO (
+                ID INT AUTO_INCREMENT PRIMARY KEY,
+                NOME VARCHAR(255),
+                EMAIL VARCHAR(255) UNIQUE,
+                SENHA VARCHAR(255),
+                FOTO_PERFIL VARCHAR(1000),
+                TEMA VARCHAR(20) DEFAULT 'CLARO',
+                COR_PRINCIPAL VARCHAR(20) DEFAULT 'AZUL',
+                INICIO_SEMANA VARCHAR(20) DEFAULT 'DOMINGO',
+                FERIADOS BOOLEAN DEFAULT FALSE,
+                ANIVERSARIOS BOOLEAN DEFAULT FALSE,
+                CONCLUIDOS BOOLEAN DEFAULT FALSE,
+                VERIFICADO BOOLEAN DEFAULT FALSE,
+                ATIVO BOOLEAN DEFAULT FALSE,
+                CODIGO_VERIFICACAO VARCHAR(10),
+                EXPIRACAO_CODIGO TIMESTAMP
+            )
+        """;
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
         } catch (SQLException e) {
@@ -64,9 +66,16 @@ public class UsuarioDAO {
         }
     }
 
+    // ===========================
+    // CRUD de usuário
+    // ===========================
     public void adicionarUsuarioComHash(Usuario u) {
-        String sql = "INSERT INTO usuario(nome,email,senha,fotoPerfil,tema,corPrincipal,inicioSemana,feriados,aniversarios,concluidos) " +
-                "VALUES(?,?,?,?,?,?,?,?,?,?)";
+        String sql = """
+            INSERT INTO USUARIO (
+                NOME, EMAIL, SENHA, FOTO_PERFIL, TEMA, COR_PRINCIPAL, INICIO_SEMANA, 
+                FERIADOS, ANIVERSARIOS, CONCLUIDOS
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             String senhaHash = BCrypt.hashpw(u.getSenha(), BCrypt.gensalt());
             ps.setString(1, u.getNome());
@@ -86,26 +95,12 @@ public class UsuarioDAO {
     }
 
     public Usuario buscarUsuarioPorEmail(String email) {
-        String sql = "SELECT * FROM usuario WHERE email = ?";
+        String sql = "SELECT * FROM USUARIO WHERE EMAIL = ?";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                Usuario u = new Usuario();
-                u.setId(rs.getInt("id"));
-                u.setNome(rs.getString("nome"));
-                u.setEmail(rs.getString("email"));
-                u.setSenha(rs.getString("senha"));
-                u.setFotoPerfil(rs.getString("fotoPerfil"));
-                u.setTema(rs.getString("tema"));
-                u.setCorPrincipal(rs.getString("corPrincipal"));
-                u.setInicioSemana(rs.getString("inicioSemana"));
-                u.setFeriados(rs.getBoolean("feriados"));
-                u.setAniversarios(rs.getBoolean("aniversarios"));
-                u.setConcluidos(rs.getBoolean("concluidos"));
-                u.setAtivo(rs.getBoolean("ativo"));
-                u.setVerificado(rs.getBoolean("verificado"));
-                return u;
+                return mapearUsuario(rs);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -113,16 +108,65 @@ public class UsuarioDAO {
         return null;
     }
 
-    public boolean login(String email, String senha) {
+    public Usuario loginUsuario(String email, String senha) {
         Usuario u = buscarUsuarioPorEmail(email);
-        if (u != null && u.isAtivo() && u.isVerificado()) {
-            return BCrypt.checkpw(senha, u.getSenha());
+        if (u != null && BCrypt.checkpw(senha, u.getSenha())) {
+            return u;
         }
-        return false;
+        return null;
     }
 
+    public List<Usuario> listarUsuarios() {
+        List<Usuario> usuarios = new ArrayList<>();
+        String sql = "SELECT * FROM USUARIO";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                usuarios.add(mapearUsuario(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return usuarios;
+    }
+
+    public void atualizarUsuario(Usuario u) {
+        String sql = """
+            UPDATE USUARIO SET 
+                NOME = ?, EMAIL = ?, SENHA = ?, FOTO_PERFIL = ?, TEMA = ?, COR_PRINCIPAL = ?, INICIO_SEMANA = ?, 
+                FERIADOS = ?, ANIVERSARIOS = ?, CONCLUIDOS = ?, VERIFICADO = ?, ATIVO = ? 
+            WHERE ID = ?
+        """;
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            String senha = u.getSenha();
+            String senhaHash = (senha != null && senha.startsWith("$2")) ? senha : BCrypt.hashpw(senha, BCrypt.gensalt());
+
+            ps.setString(1, u.getNome());
+            ps.setString(2, u.getEmail());
+            ps.setString(3, senhaHash);
+            ps.setString(4, u.getFotoPerfil());
+            ps.setString(5, u.getTema());
+            ps.setString(6, u.getCorPrincipal());
+            ps.setString(7, u.getInicioSemana());
+            ps.setBoolean(8, u.isFeriados());
+            ps.setBoolean(9, u.isAniversarios());
+            ps.setBoolean(10, u.isConcluidos());
+            ps.setBoolean(11, u.isVerificado());
+            ps.setBoolean(12, u.isAtivo());
+            ps.setInt(13, u.getId());
+
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ===========================
+    // Recuperação de senha
+    // ===========================
     public void salvarCodigo(String email, String codigo) {
-        String sql = "UPDATE usuario SET codigo_verificacao = ?, expiracao_codigo = ? WHERE email = ?";
+        String sql = "UPDATE USUARIO SET CODIGO_VERIFICACAO = ?, EXPIRACAO_CODIGO = ? WHERE EMAIL = ?";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             Timestamp expiracao = Timestamp.valueOf(java.time.LocalDateTime.now().plusMinutes(10));
             ps.setString(1, codigo);
@@ -135,13 +179,13 @@ public class UsuarioDAO {
     }
 
     public boolean validarCodigo(String email, String codigo) {
-        String sql = "SELECT codigo_verificacao, expiracao_codigo FROM usuario WHERE email = ?";
+        String sql = "SELECT CODIGO_VERIFICACAO, EXPIRACAO_CODIGO FROM USUARIO WHERE EMAIL = ?";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                String codigoBanco = rs.getString("codigo_verificacao");
-                Timestamp expiracao = rs.getTimestamp("expiracao_codigo");
+                String codigoBanco = rs.getString("CODIGO_VERIFICACAO");
+                Timestamp expiracao = rs.getTimestamp("EXPIRACAO_CODIGO");
                 return codigoBanco != null &&
                         codigoBanco.equals(codigo) &&
                         expiracao != null &&
@@ -153,100 +197,9 @@ public class UsuarioDAO {
         return false;
     }
 
-    // ==========================
-// Ativar usuário (marca ativo = true)
-// ==========================
-    public void ativarUsuario(String email) {
-        String sql = "UPDATE usuario SET ativo = TRUE WHERE email = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, email);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    public Usuario loginUsuario(String email, String senha) {
-        Usuario u = buscarUsuarioPorEmail(email);
-        if (u != null && BCrypt.checkpw(senha, u.getSenha())) {
-            return u;
-        }
-        return null;
-    }
-
-
-    // ==========================
-// Atualizar usuário (nome, email, senha, ativo, etc.)
-// ==========================
-    public void atualizarUsuario(Usuario u) {
-        String sql = "UPDATE usuario SET " +
-                "nome = ?, " +
-                "email = ?, " +
-                "senha = ?, " +
-                "fotoPerfil = ?, " +
-                "tema = ?, " +
-                "corPrincipal = ?, " +
-                "inicioSemana = ?, " +
-                "feriados = ?, " +
-                "aniversarios = ?, " +
-                "concluidos = ?, " +
-                "verificado = ?, " +
-                "ativo = ? " +
-                "WHERE id = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, u.getNome());
-            ps.setString(2, u.getEmail());
-            ps.setString(3, u.getSenha());
-            ps.setString(4, u.getFotoPerfil());
-            ps.setString(5, u.getTema());
-            ps.setString(6, u.getCorPrincipal());
-            ps.setString(7, u.getInicioSemana());
-            ps.setBoolean(8, u.isFeriados());
-            ps.setBoolean(9, u.isAniversarios());
-            ps.setBoolean(10, u.isConcluidos());
-            ps.setBoolean(11, u.isVerificado());
-            ps.setBoolean(12, u.isAtivo());
-            ps.setInt(13, u.getId());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public List<Usuario> listarUsuarios() {
-        List<Usuario> usuarios = new ArrayList<>();
-        String sql = "SELECT * FROM usuario";
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Usuario u = new Usuario();
-                u.setId(rs.getInt("id"));
-                u.setNome(rs.getString("nome"));
-                u.setEmail(rs.getString("email"));
-                u.setSenha(rs.getString("senha"));
-                u.setFotoPerfil(rs.getString("fotoPerfil"));
-                u.setTema(rs.getString("tema"));
-                u.setCorPrincipal(rs.getString("corPrincipal"));
-                u.setInicioSemana(rs.getString("inicioSemana"));
-                u.setFeriados(rs.getBoolean("feriados"));
-                u.setAniversarios(rs.getBoolean("aniversarios"));
-                u.setConcluidos(rs.getBoolean("concluidos"));
-                u.setAtivo(rs.getBoolean("ativo"));
-                u.setVerificado(rs.getBoolean("verificado"));
-                usuarios.add(u);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return usuarios;
-    }
-
-
     public boolean redefinirSenha(String email, String codigo, String novaSenha) {
         if (validarCodigo(email, codigo)) {
-            String sql = "UPDATE usuario SET senha = ?, codigo_verificacao = NULL, expiracao_codigo = NULL WHERE email = ?";
+            String sql = "UPDATE USUARIO SET SENHA = ?, CODIGO_VERIFICACAO = NULL, EXPIRACAO_CODIGO = NULL WHERE EMAIL = ?";
             try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
                 String hash = BCrypt.hashpw(novaSenha, BCrypt.gensalt());
                 ps.setString(1, hash);
@@ -258,5 +211,36 @@ public class UsuarioDAO {
             }
         }
         return false;
+    }
+
+    public void ativarUsuario(String email) {
+        String sql = "UPDATE USUARIO SET ATIVO = TRUE WHERE EMAIL = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ===========================
+    // Mapper ResultSet → Usuario
+    // ===========================
+    private Usuario mapearUsuario(ResultSet rs) throws SQLException {
+        Usuario u = new Usuario();
+        u.setId(rs.getInt("ID"));
+        u.setNome(rs.getString("NOME"));
+        u.setEmail(rs.getString("EMAIL"));
+        u.setSenha(rs.getString("SENHA"));
+        u.setFotoPerfil(rs.getString("FOTO_PERFIL"));
+        u.setTema(rs.getString("TEMA"));
+        u.setCorPrincipal(rs.getString("COR_PRINCIPAL"));
+        u.setInicioSemana(rs.getString("INICIO_SEMANA"));
+        u.setFeriados(rs.getBoolean("FERIADOS"));
+        u.setAniversarios(rs.getBoolean("ANIVERSARIOS"));
+        u.setConcluidos(rs.getBoolean("CONCLUIDOS"));
+        u.setVerificado(rs.getBoolean("VERIFICADO"));
+        u.setAtivo(rs.getBoolean("ATIVO"));
+        return u;
     }
 }

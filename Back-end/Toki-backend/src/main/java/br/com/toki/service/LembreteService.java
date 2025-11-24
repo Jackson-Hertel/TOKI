@@ -82,9 +82,16 @@ public class LembreteService {
     private void exibirNotificacao(Evento e) {
         String prioridadeTexto;
         switch (e.getPrioridade()) {
-            case 3: prioridadeTexto = "URGENTE"; break;
-            case 2: prioridadeTexto = "ALTA"; break;
-            default: prioridadeTexto = "NORMAL";
+            case "alta":
+                prioridadeTexto = "URGENTE";
+                break;
+            case "media":
+                prioridadeTexto = "ALTA";
+                break;
+            case "baixa":
+            default:
+                prioridadeTexto = "NORMAL";
+                break;
         }
 
         System.out.println("🔔 Lembrete (" + prioridadeTexto + "): " + e.getTitulo() +

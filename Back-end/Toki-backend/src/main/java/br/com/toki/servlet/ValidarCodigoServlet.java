@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet("/validar-codigo")
+@WebServlet("/usuario/validar-codigo")
 public class ValidarCodigoServlet extends HttpServlet {
 
     private final UsuarioService service = new UsuarioService();
@@ -27,12 +27,8 @@ public class ValidarCodigoServlet extends HttpServlet {
             return;
         }
 
-        boolean valido = service.redefinirSenha(email, codigoDigitado, null); // só valida
+        boolean valido = service.validarCodigo(email, codigoDigitado);
         if (valido) {
-            service.ativarUsuario(email); // ativa usuário
-
-            request.getSession().removeAttribute("usuarioEmail");
-
             response.setStatus(200);
             response.getWriter().write("✅ Código válido! Você pode redefinir a senha.");
         } else {
@@ -41,4 +37,3 @@ public class ValidarCodigoServlet extends HttpServlet {
         }
     }
 }
-

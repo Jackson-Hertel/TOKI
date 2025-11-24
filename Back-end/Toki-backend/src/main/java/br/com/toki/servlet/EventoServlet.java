@@ -1,126 +1,140 @@
 package br.com.toki.servlet;
 
-import br.com.toki.dao.EventoDAO;
+import br.com.toki.service.EventoService;
 import br.com.toki.model.Evento;
-import com.google.gson.Gson;
+import br.com.toki.model.Usuario;
+
+import com.google.gson.*;
+
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @WebServlet("/toki/evento/*")
 public class EventoServlet extends HttpServlet {
-    private final EventoDAO dao = new EventoDAO();
-    private final Gson gson = new Gson();
+
+    private final EventoService service = new EventoService();
+
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, type, ctx) -> LocalDate.parse(json.getAsString()))
+            .registerTypeAdapter(LocalDate.class, (JsonSerializer<LocalDate>) (src, type, ctx) -> new JsonPrimitive(src.toString()))
+            .registerTypeAdapter(LocalTime.class, (JsonDeserializer<LocalTime>) (json, type, ctx) -> LocalTime.parse(json.getAsString()))
+            .registerTypeAdapter(LocalTime.class, (JsonSerializer<LocalTime>) (src, type, ctx) -> new JsonPrimitive(src.toString()))
+            .create();
+
+    private void habilitarCors(HttpServletResponse resp) {
+        resp.setHeader("Access-Control-Allow-Origin", "http://localhost:5500");
+        resp.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        resp.setHeader("Access-Control-Allow-Credentials", "true");
+    }
+
+    @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) {
+        habilitarCors(resp);
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        habilitarCors(resp);
         resp.setContentType("application/json;charset=UTF-8");
-        resp.setCharacterEncoding("UTF-8");
 
-        String dataEvento = req.getParameter("data");
+        Usuario user = getUsuarioLogado(req);
+        if(user==null){ unauthorized(resp); return; }
 
-        List<Evento> eventos;
-        if (dataEvento != null && !dataEvento.isEmpty()) {
-            eventos = dao.listarPorData(dataEvento);
-        } else {
-            eventos = dao.listarTodos();
-        }
+        String data = req.getParameter("data");
+        List<Evento> eventos = (data != null && !data.isEmpty())
+                ? service.listarPorDataEUsuario(data, user.getId())
+                : service.listarPorUsuario(user.getId());
 
-        String json = gson.toJson(eventos);
-        resp.getWriter().write(json);
+        resp.getWriter().write(gson.toJson(eventos));
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        habilitarCors(resp);
         resp.setContentType("application/json;charset=UTF-8");
-        resp.setCharacterEncoding("UTF-8");
+
+        Usuario user = getUsuarioLogado(req);
+        if(user==null){ unauthorized(resp); return; }
 
         Evento novo = gson.fromJson(req.getReader(), Evento.class);
 
-        if (novo.getTitulo() == null || novo.getTitulo().isEmpty()) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"erro\": \"O título é obrigatório.\"}");
-            return;
-        }
+        // Remove ID para garantir novo registro
+        novo.setId(0);
 
-        if (novo.getDescricao() == null || novo.getDescricao().isEmpty()) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"erro\": \"A descrição é obrigatória.\"}");
-            return;
-        }
+        validarEvento(novo, resp);
+        if(resp.isCommitted()) return;
 
-        if (novo.getData() == null) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"erro\": \"A data do evento é obrigatória.\"}");
-            return;
-        }
-
-        if (novo.getPrioridade() < 1 || novo.getPrioridade() > 3) {
-            novo.setPrioridade(1);
-        }
-
-        if (novo.getRepeticao() == null || novo.getRepeticao().isEmpty()) {
-            novo.setRepeticao(null);
-        }
-
-        novo.setLembreteEnviado(false);
-
-        dao.adicionarEvento(novo);
-
+        service.adicionarEvento(novo, user.getId());
         resp.setStatus(HttpServletResponse.SC_CREATED);
-        resp.getWriter().write("{\"mensagem\": \"Evento salvo com sucesso.\"}");
+        resp.getWriter().write("{\"mensagem\":\"Evento criado\"}");
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        habilitarCors(resp);
         resp.setContentType("application/json;charset=UTF-8");
-        resp.setCharacterEncoding("UTF-8");
 
-        String pathInfo = req.getPathInfo(); // /{id}
-        if (pathInfo == null || pathInfo.equals("/")) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"erro\": \"ID do evento é obrigatório para edição.\"}");
-            return;
-        }
+        Usuario user = getUsuarioLogado(req);
+        if(user==null){ unauthorized(resp); return; }
 
-        try {
-            int id = Integer.parseInt(pathInfo.substring(1));
-            Evento eventoAtualizado = gson.fromJson(req.getReader(), Evento.class);
-            eventoAtualizado.setId(id);
+        String path = req.getPathInfo();
+        if(path==null || path.length()<=1){ badRequest(resp,"ID é obrigatório"); return; }
 
-            dao.atualizarEvento(eventoAtualizado); // você precisa criar esse método no DAO
+        int id = Integer.parseInt(path.substring(1));
+        Evento e = gson.fromJson(req.getReader(), Evento.class);
+        e.setId(id);
 
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter().write("{\"mensagem\": \"Evento atualizado com sucesso.\"}");
-        } catch (NumberFormatException e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"erro\": \"ID inválido.\"}");
-        }
+        if(e.getHora()==null) e.setHora(LocalTime.of(0,0));
+        if(e.getCor()==null) e.setCor("#4285F4");
+
+        service.atualizarEvento(e);
+        resp.getWriter().write("{\"mensagem\":\"Evento atualizado\"}");
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        habilitarCors(resp);
         resp.setContentType("application/json;charset=UTF-8");
-        resp.setCharacterEncoding("UTF-8");
 
-        String pathInfo = req.getPathInfo(); // /{id}
-        if (pathInfo == null || pathInfo.equals("/")) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"erro\": \"ID do evento é obrigatório para exclusão.\"}");
-            return;
-        }
+        Usuario user = getUsuarioLogado(req);
+        if(user==null){ unauthorized(resp); return; }
 
-        try {
-            int id = Integer.parseInt(pathInfo.substring(1));
-            dao.deletarEvento(id); // você precisa criar esse método no DAO
+        String path = req.getPathInfo();
+        if(path==null || path.length()<=1){ badRequest(resp,"ID é obrigatório"); return; }
 
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter().write("{\"mensagem\": \"Evento deletado com sucesso.\"}");
-        } catch (NumberFormatException e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"erro\": \"ID inválido.\"}");
-        }
+        int id = Integer.parseInt(path.substring(1));
+        service.deletarEvento(id);
+        resp.getWriter().write("{\"mensagem\":\"Evento deletado\"}");
+    }
+
+    private Usuario getUsuarioLogado(HttpServletRequest req){
+        HttpSession session = req.getSession(false);
+        return session != null ? (Usuario) session.getAttribute("usuarioLogado") : null;
+    }
+
+    private void unauthorized(HttpServletResponse resp) throws IOException{
+        resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        resp.getWriter().write("{\"erro\":\"Usuário não logado\"}");
+    }
+
+    private void badRequest(HttpServletResponse resp, String msg) throws IOException{
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        resp.getWriter().write("{\"erro\":\""+msg+"\"}");
+    }
+
+    private void validarEvento(Evento e, HttpServletResponse resp) throws IOException{
+        if(e.getTitulo()==null || e.getTitulo().isBlank()){ badRequest(resp,"Título obrigatório"); return; }
+        if(e.getDescricao()==null || e.getDescricao().isBlank()){ badRequest(resp,"Descrição obrigatória"); return; }
+        if(e.getData()==null){ badRequest(resp,"Data obrigatória"); return; }
+        if(e.getHora()==null) e.setHora(LocalTime.of(0,0));
+        if(e.getCor()==null) e.setCor("#4285F4");
+        if(e.getPrioridade()==null || !(e.getPrioridade().equals("baixa")||e.getPrioridade().equals("media")||e.getPrioridade().equals("alta"))) e.setPrioridade("baixa");
     }
 }
+

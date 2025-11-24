@@ -1,6 +1,12 @@
 package br.com.toki.main;
 
+import br.com.toki.filter.CorsFilter;
+import br.com.toki.servlet.EnviarCodigoServlet;
+import br.com.toki.servlet.RedefinirSenhaServlet;
 import br.com.toki.servlet.UsuarioServlet;
+import br.com.toki.servlet.EventoServlet;
+import br.com.toki.service.UsuarioService;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -9,29 +15,50 @@ import org.eclipse.jetty.servlet.ServletHolder;
 public class Main {
     public static void main(String[] args) throws Exception {
 
-        // Cria servidor na porta 8080
+        // 0️⃣ Iniciar H2 TCP Server
+        org.h2.tools.Server tcpServer = org.h2.tools.Server.createTcpServer(
+                "-tcpAllowOthers", "-tcpPort", "9092").start();
+        org.h2.tools.Server webServer = org.h2.tools.Server.createWebServer(
+                "-webAllowOthers", "-webPort", "8082").start();
+        System.out.println("H2 TCP server rodando em: " + tcpServer.getURL());
+        System.out.println("H2 Web console rodando em: " + webServer.getURL());
+
+        // 1️⃣ Criar tabela ao iniciar
+        UsuarioService service = new UsuarioService();
+        service.criarTabela();
+
+        // 2️⃣ Criar o servidor Jetty
         Server server = new Server(8080);
 
-        // Contexto principal
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        // 3️⃣ Criar contexto COM SESSÕES
+        ServletContextHandler context =
+                new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
 
-        // Configura caminho para recursos estáticos (front-end)
-        ServletHolder defaultServlet = new ServletHolder("default", DefaultServlet.class);
-        // Diretório base para arquivos estáticos: src/main/resources/static
-        defaultServlet.setInitParameter("resourceBase", Main.class.getClassLoader().getResource("static").toExternalForm());
-        defaultServlet.setInitParameter("dirAllowed", "true"); // Permite navegação por pastas
-        context.addServlet(defaultServlet, "/"); // Servir todos arquivos a partir da raiz
+        // 4️⃣ Configurar arquivos estáticos (frontend)
+        context.setResourceBase("C:/Projeto_TOKI/Back-end/Toki-backend/Toki-frontend");
 
-        // Adiciona servlet de usuários
-        context.addServlet(UsuarioServlet.class, "/usuario/*");
+        // DefaultServlet serve os arquivos HTML/CSS/JS
+        ServletHolder staticHolder = new ServletHolder("static", DefaultServlet.class);
+        staticHolder.setInitParameter("dirAllowed", "true");
+        context.addServlet(staticHolder, "/");
 
-        // Define o contexto no servidor
+        // Página inicial
+        context.setWelcomeFiles(new String[]{"login_cadastro/login.html"});
+
+        // 5️⃣ Filtro de CORS
+        context.addFilter(CorsFilter.class, "/*", null);
+
+        // 6️⃣ Registrar Servlets do backend
+        context.addServlet(new ServletHolder(new UsuarioServlet()), "/toki/usuario/*");
+        context.addServlet(new ServletHolder(new EventoServlet()), "/toki/evento/*");
+        context.addServlet(new ServletHolder(new RedefinirSenhaServlet()), "/redefinir/*");
+        context.addServlet(new ServletHolder(new EnviarCodigoServlet()), "/codigo/*");
+
+        // 7️⃣ Iniciar servidor
         server.setHandler(context);
-
-        // Inicia o servidor
         server.start();
-        System.out.println("Servidor iniciado em http://localhost:8080/login_cadastro/login.html");
+        System.out.println("Servidor iniciado em: http://localhost:8080/");
         server.join();
     }
 }
