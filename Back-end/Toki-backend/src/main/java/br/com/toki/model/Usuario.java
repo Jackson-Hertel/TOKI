@@ -1,31 +1,34 @@
 package br.com.toki.model;
 
 public class Usuario {
+
     private int id;
     private String nome;
     private String email;
     private String senha;
     private String fotoPerfil;
-    private String tema;          // ex: "claro" ou "escuro"
-    private String corPrincipal;  // ex: "azul", "verde", etc.
-    private String inicioSemana;  // ex: "domingo", "segunda"
+    private String tema;
+    private String corPrincipal;
+    private String inicioSemana;
     private boolean feriados;
     private boolean aniversarios;
     private boolean concluidos;
+    private boolean receberLembretes;
+    private String metodoLembrete;
+    private String antecedencia;
+    private String telefone;
 
-    // NOVOS campos
-    private boolean ativo = false;
-    private boolean verificado = false;
-
-    // ============================
-    // Construtores
-    // ============================
     public Usuario() {}
 
-    public Usuario(int id, String nome, String email, String senha, String fotoPerfil,
-                   String tema, String corPrincipal, String inicioSemana,
-                   boolean feriados, boolean aniversarios, boolean concluidos,
-                   boolean ativo, boolean verificado) {
+    // ==================================================
+    // CONSTRUTOR COMPLETO
+    // ==================================================
+    public Usuario(int id, String nome, String email, String senha,
+                   String fotoPerfil, String tema, String corPrincipal,
+                   String inicioSemana, boolean feriados, boolean aniversarios,
+                   boolean concluidos, boolean receberLembretes,
+                   String metodoLembrete, String antecedencia, String telefone) {
+
         this.id = id;
         this.nome = nome;
         this.email = email;
@@ -37,23 +40,21 @@ public class Usuario {
         this.feriados = feriados;
         this.aniversarios = aniversarios;
         this.concluidos = concluidos;
-        this.ativo = ativo;
-        this.verificado = verificado;
+        this.receberLembretes = receberLembretes;
+        this.metodoLembrete = metodoLembrete;
+        this.antecedencia = antecedencia;
+        this.telefone = telefone;
     }
 
-    public Usuario(int id, String nome, String email, String senha) {
-        this.id = id;
-        this.nome = nome;
-        this.email = email;
-        this.senha = senha;
-    }
-
-    // ============================
-    // Getters e Setters
-    // ============================
+    // ======================
+    // GETTERS E SETTERS
+    // ======================
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
+
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
 
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
@@ -85,9 +86,12 @@ public class Usuario {
     public boolean isConcluidos() { return concluidos; }
     public void setConcluidos(boolean concluidos) { this.concluidos = concluidos; }
 
-    public boolean isAtivo() { return ativo; }
-    public void setAtivo(boolean ativo) { this.ativo = ativo; }
+    public boolean isReceberLembretes() { return receberLembretes; }
+    public void setReceberLembretes(boolean receberLembretes) { this.receberLembretes = receberLembretes; }
 
-    public boolean isVerificado() { return verificado; }
-    public void setVerificado(boolean verificado) { this.verificado = verificado; }
+    public String getMetodoLembrete() { return metodoLembrete; }
+    public void setMetodoLembrete(String metodoLembrete) { this.metodoLembrete = metodoLembrete; }
+
+    public String getAntecedencia() { return antecedencia; }
+    public void setAntecedencia(String antecedencia) { this.antecedencia = antecedencia; }
 }

@@ -18,8 +18,8 @@
 
     <!-- SIDEBAR -->
     <aside class="w-full lg:w-64 card p-5 flex flex-col gap-5">
-        <div class="flex items-center gap-3">
-            <img id="fotoPerfil" src="../img/perfil.png" class="w-12 h-12 rounded-full ring-2 object-cover" alt="Foto">
+        <div class="flex items-center gap-3 profile-container" id="profileContainerSidebar">
+            <img class="profile-img w-16 h-16 object-cover rounded-full" alt="perfil" id="profileImageSidebar">
             <div>
                 <p id="nomeSidebar" class="font-semibold">Usuário TOKI</p>
                 <p id="emailSidebar" class="text-sm opacity-70">email@exemplo.com</p>
@@ -52,8 +52,8 @@
         <!-- CONTA -->
         <section id="abaConta" class="tab-panel">
             <h1 class="titulo">Conta</h1>
-            <div class="flex items-center gap-4">
-                <img id="fotoUsuario" src="../img/perfil.png" class="w-24 h-24 rounded-full object-cover ring-2 cursor-pointer" alt="Foto usuário">
+            <div class="flex items-center gap-4 profile-container" id="profileContainerMain">
+                <img class="profile-img w-24 h-24 object-cover rounded-full cursor-pointer" alt="perfil" id="profileImageMain">
                 <input id="inputFoto" type="file" class="hidden" accept="image/*">
                 <p class="text-sm opacity-70">Clique na foto para alterar</p>
             </div>
@@ -143,6 +143,8 @@
                     <button type="button" class="color-dot bg-blue-600" data-color="#137fec"></button>
                     <button type="button" class="color-dot bg-purple-600" data-color="#7c3aed"></button>
                     <button type="button" class="color-dot bg-emerald-600" data-color="#10b981"></button>
+                    <button type="button" class="color-dot bg-red-600" data-color="#ef4444"></button>
+                    <button type="button" class="color-dot bg-yellow-400" data-color="#facc15"></button>
                 </div>
                 <div class="mt-4 flex justify-end gap-3">
                     <button type="button" id="cancelarApar" class="btn-sec">Cancelar</button>
@@ -172,6 +174,7 @@
 
     </main>
 </div>
+
 <script src="../js/api_config.js"></script>
 <script src="../js/configuracoes_usuario.js"></script>
 </body>

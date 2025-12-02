@@ -17,15 +17,14 @@
     <h2>Redefinir Senha</h2>
     <p class="subtitle">Insira o código recebido e a nova senha.</p>
 
-    <form id="formRedefinir" class="formulario" action="/redefinir/senha" method="POST">
-        <input type="hidden" name="email">
+    <form id="formRedefinir" class="formulario">
         <div class="input-group">
             <span class="icon">🔑</span>
             <input type="text" id="codigo" name="codigo" placeholder="Código recebido" required>
         </div>
         <div class="input-group">
             <span class="icon">🔒</span>
-            <input type="password" id="novaSenha" name="senha" placeholder="Nova senha" required>
+            <input type="password" id="senha" name="senha" placeholder="Nova senha" required>
         </div>
         <button type="submit" class="btn-primary">Redefinir Senha</button>
     </form>

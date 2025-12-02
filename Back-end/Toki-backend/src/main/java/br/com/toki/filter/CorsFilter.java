@@ -8,6 +8,7 @@ import java.io.IOException;
 
 @WebFilter("/*")
 public class CorsFilter implements Filter {
+
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
@@ -15,12 +16,11 @@ public class CorsFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
+        response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        response.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization");
 
-        // Responde imediatamente OPTIONS
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
             return;
@@ -29,3 +29,4 @@ public class CorsFilter implements Filter {
         chain.doFilter(req, res);
     }
 }
+

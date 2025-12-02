@@ -19,9 +19,13 @@ public class UsuarioService {
         dao.criarTabela();
     }
 
+
     public void adicionarUsuario(Usuario usuario) {
-        // Adiciona usuário com senha já hasheada internamente no DAO
         dao.adicionarUsuarioComHash(usuario);
+    }
+
+    public Usuario buscarUsuarioPorId(int id) {
+        return dao.buscarUsuarioPorId(id);
     }
 
     public List<Usuario> listarUsuarios() {
@@ -32,8 +36,7 @@ public class UsuarioService {
         return dao.buscarUsuarioPorEmail(email);
     }
 
-    public Usuario buscarUsuarioPorEmailESenha(String email, String senha) {
-        // Retorna null se login inválido
+    public Usuario login(String email, String senha) {
         return dao.loginUsuario(email, senha);
     }
 
@@ -43,27 +46,70 @@ public class UsuarioService {
     }
 
     // ===========================
+    // Atualizações específicas
+    // ===========================
+
+    public Usuario atualizarAparencia(int id, String tema, String cor, String inicioSemana) {
+
+        Usuario u = dao.buscarUsuarioPorId(id);
+        if (u == null) return null;
+
+        if (tema != null) u.setTema(tema);
+        if (cor != null) u.setCorPrincipal(cor);
+        if (inicioSemana != null) u.setInicioSemana(inicioSemana);
+
+        dao.atualizarUsuario(u);
+        return u;
+    }
+
+    public Usuario atualizarNotificacoes(int id, boolean receber, String metodo, String antecedencia) {
+
+        Usuario u = dao.buscarUsuarioPorId(id);
+        if (u == null) return null;
+
+        u.setReceberLembretes(receber);
+        u.setMetodoLembrete(metodo);
+        u.setAntecedencia(antecedencia);
+
+        dao.atualizarUsuario(u);
+        return u;
+    }
+
+    public Usuario atualizarConta(
+            int id,
+            String nome,
+            String email,
+            String telefone,
+            String fotoPerfil
+    ) {
+
+        Usuario u = dao.buscarUsuarioPorId(id);
+        if (u == null) return null;
+
+        if (nome != null) u.setNome(nome);
+        if (email != null) u.setEmail(email);
+        if (telefone != null) u.setTelefone(telefone);
+        if (fotoPerfil != null) u.setFotoPerfil(fotoPerfil);
+
+        dao.atualizarUsuario(u);
+        return u;
+    }
+
+    // ===========================
     // Recuperação de senha
     // ===========================
 
     public void gerarCodigoRecuperacao(String email) throws MessagingException {
-        // Gera código de 6 dígitos
         String codigo = String.valueOf((int) (Math.random() * 899999 + 100000));
         dao.salvarCodigo(email, codigo);
         emailService.enviarCodigo(email, codigo);
     }
 
     public boolean redefinirSenha(String email, String codigo, String novaSenha) {
-        // Retorna true se a senha foi alterada corretamente
         return dao.redefinirSenha(email, codigo, novaSenha);
     }
 
-    public void ativarUsuario(String email) {
-        dao.ativarUsuario(email);
-    }
-
     public boolean validarCodigo(String email, String codigo) {
-        // Apenas valida, não altera nada
         return dao.validarCodigo(email, codigo);
     }
 }

@@ -1,6 +1,24 @@
-window.API_BASE = "http://localhost:8080/toki";
+/* ================================
+    CONFIGURAÇÃO BASE DAS APIs
+================================ */
+(function () {
+    const host = window.location.hostname;
 
-// toki_auth.js
+    if (host === "localhost" || host === "127.0.0.1") {
+        window.API_USUARIO = "http://localhost:8080/toki/usuario";
+        window.API_EVENTO  = "http://localhost:8080/toki/evento";
+    } else {
+        window.API_USUARIO = "./toki/usuario";
+        window.API_EVENTO  = "./toki/evento";
+    }
+
+    console.log("API_USUARIO:", window.API_USUARIO);
+    console.log("API_EVENTO:", window.API_EVENTO);
+})();
+
+/* ================================
+    INICIALIZAÇÃO
+================================ */
 document.addEventListener('DOMContentLoaded', () => {
     initToggleSenha();
     initFormCadastro();
@@ -14,13 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
     TOGGLE DE SENHA
 ========================================================= */
 function initToggleSenha() {
-    const toggles = document.querySelectorAll('.toggle-password');
-    toggles.forEach(toggle => {
+    document.querySelectorAll('.toggle-password').forEach(toggle => {
         toggle.addEventListener('click', () => {
             const input = document.getElementById(toggle.dataset.target);
             if (!input) return;
+
             input.type = input.type === 'password' ? 'text' : 'password';
-            toggle.textContent = (input.type === 'password') ? 'visibility_off' : 'visibility';
+            toggle.textContent = input.type === 'password' ? 'visibility_off' : 'visibility';
         });
     });
 }
@@ -36,20 +54,20 @@ function initFormCadastro() {
         e.preventDefault();
 
         const data = {
-            nome: form.querySelector('[name="nome"]').value,
-            email: form.querySelector('[name="email"]').value,
-            senha: form.querySelector('[name="senha"]').value
+            nome: form.nome.value,
+            email: form.email.value,
+            senha: form.senha.value
         };
 
         try {
-            const response = await fetch(`${window.API_BASE}/usuario/cadastrar`, {
+            const response = await fetch(`${API_USUARIO}/cadastrar`, {
                 method: 'POST',
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams(data),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
                 credentials: "include"
             });
 
-            let json = await safeParseJSON(response);
+            const json = await safeParseJSON(response);
 
             if (response.ok) {
                 alert(json.mensagem || "Cadastro realizado!");
@@ -76,25 +94,25 @@ function initFormLogin() {
         e.preventDefault();
 
         const data = {
-            email: form.querySelector('[name="email"]').value,
-            senha: form.querySelector('[name="senha"]').value
+            email: form.email.value,
+            senha: form.senha.value
         };
 
         try {
-            const response = await fetch(`${window.API_BASE}/usuario/login`, {
+            const response = await fetch(`${API_USUARIO}/login`, {
                 method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams(data),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
                 credentials: "include"
             });
 
-            let json = await safeParseJSON(response);
+            const json = await safeParseJSON(response);
 
             if (response.ok) {
                 msg.textContent = "✔ Login realizado!";
                 setTimeout(() => {
                     window.location.href = "../tela_principal/tela_principal.html";
-                }, 700);
+                }, 500);
             } else {
                 msg.textContent = json.erro || "Usuário ou senha inválidos";
             }
@@ -105,7 +123,7 @@ function initFormLogin() {
 }
 
 /* =========================================================
-    RECUPERAR SENHA — ENVIAR CÓDIGO
+    RECUPERAÇÃO – ENVIAR CÓDIGO
 ========================================================= */
 function initFormRecuperar() {
     const form = document.getElementById('formRecuperar');
@@ -114,24 +132,24 @@ function initFormRecuperar() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const email = form.querySelector('input[type="email"]').value;
+        const email = form.email.value;
 
         try {
-            const response = await fetch(`${window.API_BASE}/usuario/gerarCodigo`, {
+            const response = await fetch(`${API_USUARIO}/gerarCodigo`, {
                 method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams({ email }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
                 credentials: "include"
             });
 
-            let json = await safeParseJSON(response);
+            const json = await safeParseJSON(response);
 
             if (response.ok) {
                 localStorage.setItem("emailRecuperacao", email);
                 alert(json.mensagem || "Código enviado!");
                 window.location.href = "redefinir.html";
             } else {
-                alert(json.erro || "Erro ao enviar código.");
+                alert(json.erro || "Erro ao enviar código");
             }
         } catch (err) {
             alert("Erro: " + err.message);
@@ -140,37 +158,47 @@ function initFormRecuperar() {
 }
 
 /* =========================================================
-    REDEFINIR SENHA
+   REDEFINIR SENHA (CORRIGIDO!)
 ========================================================= */
 function initFormRedefinir() {
     const form = document.getElementById('formRedefinir');
     if (!form) return;
 
-    form.addEventListener("submit", async (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const codigo = form.querySelector('#codigo').value;
-        const novaSenha = form.querySelector('#novaSenha').value;
         const email = localStorage.getItem("emailRecuperacao");
-
         if (!email) return alert("Solicite o código novamente.");
 
+        const codigo = form.codigo.value.trim();
+        const senha = form.senha.value.trim(); // <-- variável correta
+
+        if (!codigo || !senha) {
+            return alert("Todos os campos são obrigatórios.");
+        }
+
+        console.log({ email, codigo, senha });
+
         try {
-            const response = await fetch(`${window.API_BASE}/usuario/redefinirSenha`, {
+            const response = await fetch(`${API_USUARIO}/redefinirSenha`, {
                 method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams({ email, codigo, senha: novaSenha }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: email,
+                    codigo: codigo,
+                    senha: senha // <-- enviado corretamente!!!
+                }),
                 credentials: "include"
             });
 
-            let json = await safeParseJSON(response);
+            const json = await safeParseJSON(response);
 
             if (response.ok) {
-                alert(json.mensagem || "Senha redefinida!");
+                alert(json.mensagem || "Senha redefinida com sucesso!");
                 localStorage.removeItem("emailRecuperacao");
                 window.location.href = "login.html";
             } else {
-                alert(json.erro || "Erro ao redefinir senha.");
+                alert(json.erro || "Erro ao redefinir senha");
             }
         } catch (err) {
             alert("Erro: " + err.message);
@@ -179,28 +207,29 @@ function initFormRedefinir() {
 }
 
 /* =========================================================
-    TELA DE VALIDAÇÃO DE CÓDIGO
+    VALIDAÇÃO
 ========================================================= */
 function initFormValidacao() {
     const form = document.getElementById('formValidar');
-    const msg = document.getElementById('mensagem');
-
     if (!form) return;
 
-    form.addEventListener("submit", async (e) => {
+    const msg = document.getElementById('mensagem');
+
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const data = new FormData(form);
+        const codigo = form.codigo.value;
 
         try {
-            const response = await fetch(`${window.API_BASE}/usuario/validarCodigo`, {
+            const response = await fetch(`${API_USUARIO}/validar`, {
                 method: "POST",
-                body: data,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ codigo }),
                 credentials: "include"
             });
 
-            const text = await response.text();
-            msg.textContent = text;
+            const json = await safeParseJSON(response);
+            msg.textContent = json.mensagem || json.erro || "Resultado recebido";
         } catch (err) {
             msg.textContent = "Erro: " + err.message;
         }
@@ -208,7 +237,7 @@ function initFormValidacao() {
 }
 
 /* =========================================================
-    FUNÇÃO UTIL — TENTA PARSE DE JSON COM SEGURANÇA
+    JSON SEGURO
 ========================================================= */
 async function safeParseJSON(response) {
     const text = await response.text();

@@ -6,22 +6,14 @@ import java.sql.SQLException;
 
 public class Conexao {
 
+    // Banco H2 dentro da pasta do projeto (ex.: pendrive/TOKI/database)
     private static final String URL =
-            "jdbc:h2:tcp://localhost/C:/Projeto_TOKI/Back-end/Toki-backend/database/toki_db;" +
-                    "AUTO_SERVER=TRUE;" +
-                    "DB_CLOSE_DELAY=-1;" +
-                    "IFEXISTS=FALSE;" +
-                    "MODE=MySQL;" +
-                    "DATABASE_TO_UPPER=false";
-
+            "jdbc:h2:file:./database/toki_db;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1;MODE=MySQL;DATABASE_TO_UPPER=false";
     private static final String USER = "sa";
     private static final String PASS = "";
 
-    public Connection getConnection() {
-        try {
-            return DriverManager.getConnection(URL, USER, PASS);
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao conectar ao banco H2", e);
-        }
+    // Método estático para usar em todo DAO
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASS);
     }
 }

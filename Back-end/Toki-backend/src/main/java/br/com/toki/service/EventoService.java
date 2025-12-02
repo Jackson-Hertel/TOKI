@@ -25,11 +25,39 @@ public class EventoService {
         return dao.listarTodos();
     }
 
-    public void atualizarEvento(Evento e) {
-        dao.atualizarEvento(e);
+    // ========================
+    // Atualizar evento
+    // ========================
+    public void atualizarEvento(Evento e, int usuarioId) {
+        // Garante que o evento pertence ao usuário antes de atualizar
+        List<Evento> eventosDoUsuario = dao.listarPorUsuario(usuarioId);
+        boolean existe = eventosDoUsuario.stream().anyMatch(ev -> ev.getId() == e.getId());
+        if (existe) {
+            dao.atualizarEvento(e);
+        } else {
+            throw new RuntimeException("Evento não encontrado ou não pertence ao usuário");
+        }
     }
 
-    public void deletarEvento(int id) {
-        dao.deletarEvento(id);
+    // ========================
+    // Deletar evento
+    // ========================
+    public void deletarEvento(int id, int usuarioId) {
+        // Garante que o evento pertence ao usuário antes de deletar
+        List<Evento> eventosDoUsuario = dao.listarPorUsuario(usuarioId);
+        boolean existe = eventosDoUsuario.stream().anyMatch(ev -> ev.getId() == id);
+        if (existe) {
+            dao.deletarEvento(id);
+        } else {
+            throw new RuntimeException("Evento não encontrado ou não pertence ao usuário");
+        }
+    }
+
+    // ========================
+    // Buscar evento por ID e usuário
+    // ========================
+    public Evento buscarPorId(int id, int usuarioId) {
+        List<Evento> eventosDoUsuario = dao.listarPorUsuario(usuarioId);
+        return eventosDoUsuario.stream().filter(ev -> ev.getId() == id).findFirst().orElse(null);
     }
 }

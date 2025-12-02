@@ -18,6 +18,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jetty.version>11.0.18</jetty.version>
+        <servlet.api.version>6.0.0</servlet.api.version>
     </properties>
 
     <dependencies>
@@ -28,36 +29,33 @@
             <artifactId>jetty-server</artifactId>
             <version>${jetty.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
             <version>${jetty.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
             <version>${jetty.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-security</artifactId>
             <version>${jetty.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-annotations</artifactId>
             <version>${jetty.version}</version>
         </dependency>
 
-        <!-- Jakarta Servlet API -->
+        <!-- Jakarta Servlet API 6 -->
         <dependency>
-            <groupId>org.eclipse.jetty.toolchain</groupId>
-            <artifactId>jetty-jakarta-servlet-api</artifactId>
-            <version>5.0.2</version>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${servlet.api.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Gson -->
@@ -74,7 +72,7 @@
             <version>2.2.224</version>
         </dependency>
 
-        <!-- Email (CORRETO) -->
+        <!-- Angus Mail -->
         <dependency>
             <groupId>org.eclipse.angus</groupId>
             <artifactId>angus-mail</artifactId>
@@ -94,11 +92,17 @@
             <artifactId>slf4j-api</artifactId>
             <version>2.0.5</version>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>2.0.5</version>
+        </dependency>
+
+        <!-- Commons FileUpload -->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.5</version>
         </dependency>
 
     </dependencies>
@@ -106,7 +110,7 @@
     <build>
         <plugins>
 
-            <!-- Compilador Java -->
+            <!-- Compilador -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -117,7 +121,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Criar JAR executável -->
+            <!-- Gera um JAR ÚNICO com TODAS as dependências -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -125,9 +129,11 @@
                 <executions>
                     <execution>
                         <phase>package</phase>
-                        <goals><goal>shade</goal></goals>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
                         <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <finalName>toki-backend-completo</finalName>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>br.com.toki.main.Main</mainClass>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOKI - Calendário</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/tela_principal.css">
+    <link rel="icon" href="../img/favicon.ico" type="image/png">
+</head>
+
+<body class="bg-[var(--bg)] text-[var(--text)] font-sans">
+
+<!-- HEADER -->
+<header class="flex items-center justify-between px-4 py-3 shadow-md
+        bg-[var(--card)] border-b border-[var(--border)]">
+    <div class="flex items-center gap-2">
+        <img src="../img/favicon.ico" alt="TOKI" class="w-9 h-9">
+        <h1 class="text-xl font-bold text-[var(--toki-primary)]">TOKI</h1>
+    </div>
+
+    <div class="flex items-center gap-4 text-2xl text-[var(--text)]">
+        <div id="settingsBtn" class="cursor-pointer hover:scale-110 transition">⚙️</div>
+        <div id="notificationsBtn" class="cursor-pointer hover:scale-110 transition">🔔</div>
+
+        <div class="w-10 h-10 rounded-full overflow-hidden border border-[var(--border)] relative">
+            <img id="profileImage" class="w-full h-full object-cover" alt="perfil" src="../img/default-profile.jpg">
+            <input type="file" id="profileImageInput" class="absolute inset-0 opacity-0 cursor-pointer">
+        </div>
+    </div>
+</header>
+
+<!-- MAIN -->
+<main class="flex flex-col md:flex-row gap-4 p-4">
+
+    <!-- LEFT PANEL -->
+    <aside class="w-full md:w-64 bg-[var(--card)] border border-[var(--border)]
+            rounded-lg p-4 shadow flex flex-col gap-3">
+
+        <button id="createEventBtn"
+                class="bg-[var(--toki-primary)] hover:bg-[var(--toki-primary-hover)]
+                   text-white font-bold py-3 rounded-lg w-full transition">
+            + Criar Evento
+        </button>
+
+        <button id="showEventsBtn"
+                class="bg-[var(--toki-primary)] hover:bg-[var(--toki-primary-hover)]
+                   text-white font-bold py-3 rounded-lg w-full transition">
+            Eventos
+        </button>
+    </aside>
+
+    <!-- CALENDAR -->
+    <section class="flex-1 flex flex-col gap-3 bg-[var(--card)] border border-[var(--border)] rounded-lg p-3">
+
+        <div class="flex justify-between items-center text-lg font-bold text-[var(--text)]">
+            <button id="prevMonthBtn"
+                    class="px-3 py-1 bg-[#131b2c] hover:bg-[#1a2340] rounded text-[var(--text)]">&lt;</button>
+
+            <span id="calendarMonth">Carregando...</span>
+
+            <button id="nextMonthBtn"
+                    class="px-3 py-1 bg-[#131b2c] hover:bg-[#1a2340] rounded text-[var(--text)]">&gt;</button>
+        </div>
+
+        <!-- DIAS DA SEMANA -->
+        <div class="calendar-header text-[var(--muted)] font-semibold">
+            <div>Seg</div><div>Ter</div><div>Qua</div>
+            <div>Qui</div><div>Sex</div><div>Sáb</div><div>Dom</div>
+        </div>
+
+        <div id="calendarGrid" class="calendar-grid"></div>
+    </section>
+
+    <!-- RIGHT PANEL (DAY DETAILS) -->
+    <aside id="rightPanel"
+           class="w-full md:w-80 bg-[var(--card)] border border-[var(--border)]
+               rounded-lg p-4 shadow flex flex-col gap-3 overflow-y-auto hidden">
+
+        <h2 id="selectedDayTitle" class="text-lg font-bold text-[var(--text)]">Dia</h2>
+        <p id="selectedDayInfo" class="text-[var(--muted)]"></p>
+
+        <div id="eventsList" class="mt-1 flex flex-col gap-2"></div>
+    </aside>
+</main>
+
+<!-- EVENT MODAL -->
+<div id="eventModal"
+     class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+
+    <div class="relative bg-[var(--card)] border border-[var(--border)] rounded-lg
+                w-full sm:w-96 max-h-[90vh] overflow-y-auto flex flex-col gap-3 p-4 shadow-lg">
+
+        <button id="closeModalBtn"
+                class="absolute top-2 right-2 text-[var(--muted)] hover:text-[var(--text)] text-xl font-bold">&times;</button>
+
+        <h2 id="modalTitle" class="text-xl font-bold text-[var(--text)] mb-2">Criar Evento</h2>
+
+        <form id="form-evento" class="flex flex-col gap-2">
+            <input type="hidden" id="eventId">
+
+            <input type="text" id="eventTitle" placeholder="Título do evento" class="input-dark" required>
+
+            <textarea id="eventDescription" placeholder="Descrição" class="input-dark" rows="3"></textarea>
+
+            <input type="date" id="eventDate" class="input-dark" required>
+            <input type="time" id="eventStartTime" class="input-dark">
+            <input type="time" id="eventEndTime" class="input-dark">
+            <input type="text" id="eventLocation" placeholder="Local / Link" class="input-dark">
+
+            <select id="eventPriority" class="input-dark">
+                <option value="baixa">Baixa</option>
+                <option value="media">Média</option>
+                <option value="alta">Alta</option>
+            </select>
+
+            <select id="eventRecurrence" class="input-dark">
+                <option value="none">Nenhuma</option>
+                <option value="diario">Diário</option>
+                <option value="semanal">Semanal</option>
+                <option value="mensal">Mensal</option>
+                <option value="anual">Anual</option>
+            </select>
+
+            <select id="eventReminder" class="input-dark">
+                <option value="none">Nenhum</option>
+                <option value="10min">10 min antes</option>
+                <option value="1h">1 hora antes</option>
+                <option value="1d">1 dia antes</option>
+            </select>
+
+            <div class="flex flex-col sm:flex-row gap-2 mt-3">
+                <button type="submit" id="saveEventBtn"
+                        class="bg-[var(--toki-primary)] hover:bg-[var(--toki-primary-hover)]
+                               text-white font-bold py-2 rounded flex-1">
+                    Salvar
+                </button>
+
+                <button type="button" id="deleteEventBtn"
+                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded flex-1 hidden">
+                    Excluir
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- EVENTS PANEL -->
+<div id="eventsPanel" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 overflow-auto p-4">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg
+                w-full max-w-4xl mx-auto p-6 flex flex-col gap-4 relative">
+
+        <button id="closePainelBtn"
+                class="absolute top-2 right-2 text-[var(--muted)] hover:text-[var(--text)] text-xl font-bold">&times;</button>
+
+        <h2 class="text-xl font-bold text-[var(--text)] mb-3">Todos os Eventos</h2>
+
+        <div class="flex gap-2 mb-3">
+            <select id="filterMonth" class="input-dark">
+                <option value="">Todos os meses</option>
+                <option value="0">Janeiro</option>
+                <option value="1">Fevereiro</option>
+                <option value="2">Março</option>
+                <option value="3">Abril</option>
+                <option value="4">Maio</option>
+                <option value="5">Junho</option>
+                <option value="6">Julho</option>
+                <option value="7">Agosto</option>
+                <option value="8">Setembro</option>
+                <option value="9">Outubro</option>
+                <option value="10">Novembro</option>
+                <option value="11">Dezembro</option>
+            </select>
+
+            <select id="filterPriority" class="input-dark">
+                <option value="">Todas</option>
+                <option value="alta">Alta</option>
+                <option value="media">Média</option>
+                <option value="baixa">Baixa</option>
+            </select>
+        </div>
+
+        <div id="eventsPanelList" class="flex flex-col gap-2 max-h-[70vh] overflow-y-auto"></div>
+    </div>
+</div>
+
+<script src="../js/api_config.js"></script>
+<script src="../js/tela_principal.js"></script>
+
+</body>
+</html>

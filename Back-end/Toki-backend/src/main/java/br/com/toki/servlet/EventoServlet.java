@@ -3,12 +3,9 @@ package br.com.toki.servlet;
 import br.com.toki.service.EventoService;
 import br.com.toki.model.Evento;
 import br.com.toki.model.Usuario;
-
 import com.google.gson.*;
-
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -22,8 +19,11 @@ public class EventoServlet extends HttpServlet {
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, type, ctx) -> LocalDate.parse(json.getAsString()))
             .registerTypeAdapter(LocalDate.class, (JsonSerializer<LocalDate>) (src, type, ctx) -> new JsonPrimitive(src.toString()))
-            .registerTypeAdapter(LocalTime.class, (JsonDeserializer<LocalTime>) (json, type, ctx) -> LocalTime.parse(json.getAsString()))
-            .registerTypeAdapter(LocalTime.class, (JsonSerializer<LocalTime>) (src, type, ctx) -> new JsonPrimitive(src.toString()))
+            .registerTypeAdapter(LocalTime.class, (JsonDeserializer<LocalTime>) (json, type, ctx) -> {
+                String s = json.getAsString();
+                return (s == null || s.isEmpty()) ? null : LocalTime.parse(s);
+            })
+            .registerTypeAdapter(LocalTime.class, (JsonSerializer<LocalTime>) (src, type, ctx) -> new JsonPrimitive(src == null ? "" : src.toString()))
             .create();
 
     private void habilitarCors(HttpServletResponse resp) {
@@ -44,14 +44,32 @@ public class EventoServlet extends HttpServlet {
         resp.setContentType("application/json;charset=UTF-8");
 
         Usuario user = getUsuarioLogado(req);
-        if(user==null){ unauthorized(resp); return; }
+        if(user == null){ unauthorized(resp); return; }
 
+        String path = req.getPathInfo();
         String data = req.getParameter("data");
-        List<Evento> eventos = (data != null && !data.isEmpty())
-                ? service.listarPorDataEUsuario(data, user.getId())
-                : service.listarPorUsuario(user.getId());
 
-        resp.getWriter().write(gson.toJson(eventos));
+        try {
+            if(path == null || path.equals("/")) {
+                List<Evento> eventos = (data != null && !data.isEmpty())
+                        ? service.listarPorDataEUsuario(data, user.getId())
+                        : service.listarPorUsuario(user.getId());
+                resp.getWriter().write(gson.toJson(eventos));
+            } else {
+                int id = Integer.parseInt(path.substring(1));
+                Evento e = service.buscarPorId(id, user.getId());
+                if(e == null){
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    resp.getWriter().write("{\"erro\":\"Evento não encontrado\"}");
+                    return;
+                }
+                resp.getWriter().write(gson.toJson(e));
+            }
+        } catch (Exception ex){
+            ex.printStackTrace();
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().write("{\"erro\":\"Erro ao buscar eventos\"}");
+        }
     }
 
     @Override
@@ -60,15 +78,17 @@ public class EventoServlet extends HttpServlet {
         resp.setContentType("application/json;charset=UTF-8");
 
         Usuario user = getUsuarioLogado(req);
-        if(user==null){ unauthorized(resp); return; }
+        if(user == null){ unauthorized(resp); return; }
 
         Evento novo = gson.fromJson(req.getReader(), Evento.class);
-
-        // Remove ID para garantir novo registro
         novo.setId(0);
 
-        validarEvento(novo, resp);
-        if(resp.isCommitted()) return;
+        preencherCamposOpcionais(novo);
+
+        if(!validarEvento(novo)){
+            badRequest(resp,"Dados inválidos");
+            return;
+        }
 
         service.adicionarEvento(novo, user.getId());
         resp.setStatus(HttpServletResponse.SC_CREATED);
@@ -81,19 +101,18 @@ public class EventoServlet extends HttpServlet {
         resp.setContentType("application/json;charset=UTF-8");
 
         Usuario user = getUsuarioLogado(req);
-        if(user==null){ unauthorized(resp); return; }
+        if(user == null){ unauthorized(resp); return; }
 
         String path = req.getPathInfo();
-        if(path==null || path.length()<=1){ badRequest(resp,"ID é obrigatório"); return; }
+        if(path == null || path.length() <= 1){ badRequest(resp,"ID é obrigatório"); return; }
 
         int id = Integer.parseInt(path.substring(1));
         Evento e = gson.fromJson(req.getReader(), Evento.class);
         e.setId(id);
 
-        if(e.getHora()==null) e.setHora(LocalTime.of(0,0));
-        if(e.getCor()==null) e.setCor("#4285F4");
+        preencherCamposOpcionais(e);
+        service.atualizarEvento(e, user.getId());
 
-        service.atualizarEvento(e);
         resp.getWriter().write("{\"mensagem\":\"Evento atualizado\"}");
     }
 
@@ -103,13 +122,14 @@ public class EventoServlet extends HttpServlet {
         resp.setContentType("application/json;charset=UTF-8");
 
         Usuario user = getUsuarioLogado(req);
-        if(user==null){ unauthorized(resp); return; }
+        if(user == null){ unauthorized(resp); return; }
 
         String path = req.getPathInfo();
-        if(path==null || path.length()<=1){ badRequest(resp,"ID é obrigatório"); return; }
+        if(path == null || path.length() <= 1){ badRequest(resp,"ID é obrigatório"); return; }
 
         int id = Integer.parseInt(path.substring(1));
-        service.deletarEvento(id);
+        service.deletarEvento(id, user.getId());
+
         resp.getWriter().write("{\"mensagem\":\"Evento deletado\"}");
     }
 
@@ -128,13 +148,27 @@ public class EventoServlet extends HttpServlet {
         resp.getWriter().write("{\"erro\":\""+msg+"\"}");
     }
 
-    private void validarEvento(Evento e, HttpServletResponse resp) throws IOException{
-        if(e.getTitulo()==null || e.getTitulo().isBlank()){ badRequest(resp,"Título obrigatório"); return; }
-        if(e.getDescricao()==null || e.getDescricao().isBlank()){ badRequest(resp,"Descrição obrigatória"); return; }
-        if(e.getData()==null){ badRequest(resp,"Data obrigatória"); return; }
-        if(e.getHora()==null) e.setHora(LocalTime.of(0,0));
-        if(e.getCor()==null) e.setCor("#4285F4");
-        if(e.getPrioridade()==null || !(e.getPrioridade().equals("baixa")||e.getPrioridade().equals("media")||e.getPrioridade().equals("alta"))) e.setPrioridade("baixa");
+    private boolean validarEvento(Evento e){
+        if(e.getTitulo() == null || e.getTitulo().isBlank()) return false;
+        if(e.getDescricao() == null || e.getDescricao().isBlank()) return false;
+        if(e.getData() == null) return false;
+        if(e.getPrioridade() == null ||
+                !(e.getPrioridade().equals("baixa") || e.getPrioridade().equals("media") || e.getPrioridade().equals("alta"))){
+            e.setPrioridade("baixa");
+        }
+        if(e.getCor() == null) e.setCor("#4285F4");
+        if(e.getHora() == null) e.setHora(LocalTime.of(0,0));
+        if(e.getHoraFim() == null) e.setHoraFim(LocalTime.of(0,0));
+        return true;
+    }
+
+    private void preencherCamposOpcionais(Evento e){
+        if(e.getHora() == null) e.setHora(LocalTime.of(0,0));
+        if(e.getHoraFim() == null) e.setHoraFim(LocalTime.of(0,0));
+        if(e.getLocal() == null) e.setLocal("");
+        if(e.getAlerta() == null) e.setAlerta("none");
+        if(e.getCor() == null) e.setCor("#4285F4");
+        if(e.getPrioridade() == null) e.setPrioridade("baixa");
+        if(e.getRepeticao() == null) e.setRepeticao("none");
     }
 }
-
